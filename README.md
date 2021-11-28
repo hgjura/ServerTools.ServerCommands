@@ -1,7 +1,7 @@
 <h1 align="center">
-  <a href="https://github.com/hgjura/command-pattern-with-queues">
+  <a href="https://github.com/hgjura/ServerTools.ServerCommands">
     <!-- Please provide path to your logo here -->
-    <img src="docs/logo.png" alt="Logo" width="650" height="150">
+    <img src=".github/logo.png" alt="Logo" width="650" height="150">
   </a>
 </h1>
 
@@ -11,11 +11,11 @@
   <!-- <a href="#about"><strong>Explore the screenshots »</strong></a>
   <br />
   <br /> -->
-  <a href="https://github.com/hgjura/command-pattern-with-queues/issues/new?assignees=&labels=bug&template=CONTRIBUTING.md&title=bug%3A+">Report a Bug</a>
+  <a href="https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=bug&template=CONTRIBUTING.md&title=bug%3A+">Report a Bug</a>
   ·
-  <a href="https://github.com/hgjura/command-pattern-with-queues/issues/new?assignees=&labels=enhancement&template=02_FEATURE_REQUEST.md&title=feat%3A+">Request a Feature</a>
+  <a href="https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=enhancement&template=02_FEATURE_REQUEST.md&title=feat%3A+">Request a Feature</a>
   .
-  <a href="https://github.com/hgjura/command-pattern-with-queues/issues/new?assignees=&labels=question&template=04_SUPPORT_QUESTION.md&title=support%3A+">Ask a Question</a>
+  <a href="https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=question&template=04_SUPPORT_QUESTION.md&title=support%3A+">Ask a Question</a>
 </div>
 
 <div align="center">
@@ -101,11 +101,11 @@ Project description
 
 ## Roadmap
 
-See the [open issues](https://github.com/hgjura/command-pattern-with-queues/issues) for a list of proposed features (and known issues).
+See the [open issues](https://github.com/hgjura/ServerTools.ServerCommands/issues) for a list of proposed features (and known issues).
 
-- [Top Feature Requests](https://github.com/hgjura/command-pattern-with-queues/issues?q=label%3Aenhancement+is%3Aopen+sort%3Areactions-%2B1-desc) (Add your votes using the 👍 reaction)
-- [Top Bugs](https://github.com/hgjura/command-pattern-with-queues/issues?q=is%3Aissue+is%3Aopen+label%3Abug+sort%3Areactions-%2B1-desc) (Add your votes using the 👍 reaction)
-- [Newest Bugs](https://github.com/hgjura/command-pattern-with-queues/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+- [Top Feature Requests](https://github.com/hgjura/ServerTools.ServerCommands/issues?q=label%3Aenhancement+is%3Aopen+sort%3Areactions-%2B1-desc) (Add your votes using the 👍 reaction)
+- [Top Bugs](https://github.com/hgjura/ServerTools.ServerCommands/issues?q=is%3Aissue+is%3Aopen+label%3Abug+sort%3Areactions-%2B1-desc) (Add your votes using the 👍 reaction)
+- [Newest Bugs](https://github.com/hgjura/ServerTools.ServerCommands/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
 
 ## Support
 
@@ -114,14 +114,14 @@ See the [open issues](https://github.com/hgjura/command-pattern-with-queues/issu
 
 Reach out to the maintainer at one of the following places:
 
-- [GitHub issues](https://github.com/hgjura/command-pattern-with-queues/issues/new?assignees=&labels=question&template=04_SUPPORT_QUESTION.md&title=support%3A+)
+- [GitHub issues](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=question&template=04_SUPPORT_QUESTION.md&title=support%3A+)
 - The email which is located [in GitHub profile](https://github.com/hgjura)
 
 ## Project assistance
 
 If you want to say **thank you** or/and support active development of ServerTools.ServerCommands:
 
-- Add a [GitHub Star](https://github.com/hgjura/command-pattern-with-queues) to the project.
+- Add a [GitHub Star](https://github.com/hgjura/ServerTools.ServerCommands) to the project.
 - Tweet about the ServerTools.ServerCommands on your Twitter.
 - Write interesting articles about the project on [Dev.to](https://dev.to/), [Medium](https://medium.com/) or personal blog.
 
@@ -131,7 +131,7 @@ Together, we can make ServerTools.ServerCommands **better**!
 
 First off, thanks for taking the time to contribute! Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make will benefit everybody else and are **greatly appreciated**.
 
-We have set up a separate document containing our [contribution guidelines](docs/CONTRIBUTING.md).
+We have set up a separate document containing our [contribution guidelines](.github/CONTRIBUTING.md).
 
 Thank you for being involved!
 
@@ -139,14 +139,14 @@ Thank you for being involved!
 
 The original setup of this repository is by [Herald Gjura](https://github.com/hgjura).
 
-For a full list of all authors and contributors, check [the contributor's page](https://github.com/hgjura/command-pattern-with-queues/contributors).
+For a full list of all authors and contributors, check [the contributor's page](https://github.com/hgjura/ServerTools.ServerCommands/contributors).
 
 ## Security
 
 ServerTools.ServerCommands follows good practices of security, but 100% security can't be granted in software.
 ServerTools.ServerCommands is provided **"as is"** without any **warranty**. Use at your own risk.
 
-_For more info, please refer to the [security](docs/SECURITY.md)._
+_For more info, please refer to the [security](.github/SECURITY.md)._
 
 ## License
 

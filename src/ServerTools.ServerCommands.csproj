@@ -6,7 +6,7 @@
     <Authors>Herald Gjura</Authors>
     <Company>ServerTools</Company>
     <Copyright>Copyright 2021 (c) ServerTools. All rights reserved.</Copyright>
-    <Description>This is a private package created by Videntur Corp. to enable Azure functionality to all operational services.</Description>
+    <Description>Description of the package.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>Azure, Remote Comamnds, Messaging, Queues, Service Bus</PackageTags>
     <RepositoryUrl>https://github.com/hgjura/ServerTools.ServerCommands</RepositoryUrl>
