@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <PackageId>ServerTools.ServerCommands</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>Herald Gjura</Authors>
+    <Company>ServerTools</Company>
+    <Copyright>Copyright 2021 (c) ServerTools. All rights reserved.</Copyright>
+    <Description>This is a private package created by Videntur Corp. to enable Azure functionality to all operational services.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>Azure, Remote Comamnds, Messaging, Queues, Service Bus</PackageTags>
+    <RepositoryUrl>https://github.com/hgjura/ServerTools.ServerCommands</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageIconUrl>https://github.com/hgjura/ServerTools.ServerCommands/master/.github/icon-120x120.png</PackageIconUrl>
+    <PackageIcon>icon-120x120.png</PackageIcon>
+  </PropertyGroup>
+</Project>
