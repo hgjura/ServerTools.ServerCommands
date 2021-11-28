@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <PackageId>ServerTools.ServerCommands</PackageId>
@@ -12,8 +12,11 @@
     <RepositoryUrl>https://github.com/hgjura/ServerTools.ServerCommands</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageIconUrl>https://github.com/hgjura/ServerTools.ServerCommands/master/.github/icon-120x120.png</PackageIconUrl>
-    <PackageIcon>icon-120x120.png</PackageIcon>
+    <PackageIcon>nuget_logo_120-120.png</PackageIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="nuget_logo_120-120.png" Pack="true" PackagePath=""/>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Queues" Version="12.8.0" />
     <PackageReference Include="DryIoc.dll" Version="4.8.4" />
