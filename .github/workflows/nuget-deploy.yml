@@ -19,15 +19,15 @@ jobs:
         dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore
-
+      working-directory: ./src/
     - name: Build
       run: dotnet build --no-restore
-
+      working-directory: ./src/
     # - name: Test
     #   run: dotnet test --no-build --verbosity normal
       
     - name: Publish  
       uses: brandedoutcast/publish-nuget@v2.5.2  
       with:   
-        PROJECT_FILE_PATH: ServerTools.ServerCommands.csproj  
+        PROJECT_FILE_PATH: ./src/ServerTools.ServerCommands.csproj  
         NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
