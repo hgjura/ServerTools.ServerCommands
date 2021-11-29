@@ -13,9 +13,11 @@
     <RepositoryType>git</RepositoryType>
     <PackageIconUrl>https://github.com/hgjura/ServerTools.ServerCommands/master/.github/icon-120x120.png</PackageIconUrl>
     <PackageIcon>nuget_logo_120-120.png</PackageIcon>
+    <PackageReadmeFile>nuget-readme.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="nuget_logo_120-120.png" Pack="true" PackagePath=""/>
+    <None Include="nuget-readme.md" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Queues" Version="12.8.0" />
