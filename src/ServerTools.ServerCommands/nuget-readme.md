@@ -1,66 +1,69 @@
 ﻿## About
 
-MySqlConnector is an [ADO.NET](https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/) data provider for [MySQL](https://www.mysql.com/), [MariaDB](https://mariadb.org/), [Amazon Aurora](https://aws.amazon.com/rds/aurora/), [Azure Database for MySQL](https://azure.microsoft.com/en-us/services/mysql/) and other MySQL-compatible databases.
+ServerCommands facilitates running of units of code or commands remotely. It incorporates principles of messaging architectures used by most messaging tools and frameworks, like [Azure Service Bus](https://docs.microsoft.com/en-ca/azure/service-bus-messaging/), [AWS SQS](https://aws.amazon.com/sqs/), [RabbitMQ](https://www.rabbitmq.com/), or [Azure Storage Queues](https://docs.microsoft.com/en-ca/azure/storage/queues/storage-dotnet-how-to-use-queues?tabs=dotnet), [Apache Kafka](https://kafka.apache.org/) without any of the knowledge and configuration expertise to manage such installations and configurations. 
 
-More documentation is available at the [MySqlConnector website](https://mysqlconnector.net/).
+Currently, the library requires an Azure Storage account to run. But by no means this is a major dependency. All messaging services work very similarly, and the choice to use Azure Storage is purely for simplictiy and cost. Azure Storage provides both storage and queueing service at a minimal cost. In future iterations, and upon demand, versions of this library that work with all the other messaging services will be provided.  
+
+
+More documentation is available at the [ServerCommands](https://github.com/hgjura/ServerTools.ServerCommands).
 
 ## How to Use
 
+To post a command:
 ```csharp
-// set these values correctly for your database server
-var builder = new MySqlConnectionStringBuilder
-{
-	Server = "your-server",
-	UserID = "database-user",
-	Password = "P@ssw0rd!",
-	Database = "database-name",
-};
+var _container = new CommandContainer();
 
-// open a connection asynchronously
-using var connection = new MySqlConnection(builder.ConnectionString);
-await connection.OpenAsync();
+_container.RegisterCommand<AddNumbersCommand>();
 
-// create a DB command and set the SQL statement with parameters
-using var command = connection.CreateCommand();
-command.CommandText = @"SELECT * FROM orders WHERE order_id = @OrderId;";
-command.Parameters.AddWithValue("@OrderId", orderId);
+var c = new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"));
 
-// execute the command and read the results
-using var reader = await command.ExecuteReaderAsync();
-while (reader.Read())
-{
-	var id = reader.GetInt32("order_id");
-	var date = reader.GetDateTime("order_date");
-	// ...
-}
+_ = await c.PostCommand<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
 ```
+
+To execute commands:
+
+```csharp
+var _container = new CommandContainer();
+
+_container.RegisterCommand<AddNumbersCommand>();
+
+var c = new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"));
+
+var result = await c.ExecuteCommands();
+
+//check if something was wrong or if any items were processed at all
+Assert.IsTrue(!result.Item1);
+
+//check if 1 or more items were processed
+Assert.IsTrue(result.Item2 > 0);
+
+//check if there was any errors
+Assert.IsTrue(result.Item3.Count > 0); //This value keeps the list of error messages that were encountered. After retrying 5 times the command is moved to the deadletterqueue.
+
+```
+
+And that's that!
+
+For more detailed documentation and more complex use cases head to the offical documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If theer are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=hgjura&labels=question&title=ask%3A+) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=hgjura&labels=request&title=newfeature%3A+) do not hesitate to post them there.
+
 
 ## Key Features
 
-* Full support for async I/O
+* Enhanced simplicity
+* Asynchroneous remote execution
+* Batching and correlation of commands
+* Commands with remote response execution
 * High performance
-* Supports .NET Framework, .NET Core, and .NET 5.0+
-
-## Main Types
-
-The main types provided by this library are:
-
-* `MySqlConnection` (implementation of `DbConnection`)
-* `MySqlCommand` (implementation of `DbCommand`)
-* `MySqlDataReader` (implementation of `DbDataReader`)
-* `MySqlBulkCopy`
-* `MySqlBulkLoader`
-* `MySqlConnectionStringBuilder`
-* `MySqlConnectorFactory`
-* `MySqlDataAdapter`
-* `MySqlException`
-* `MySqlTransaction` (implementation of `DbTransaction`)
+* Supports .NET 5.0+
 
 ## Related Packages
 
-* Entity Framework Core: [Pomelo.EntityFrameworkCore.MySql](https://www.nuget.org/packages/Pomelo.EntityFrameworkCore.MySql/)
-* Logging: [log4net](https://www.nuget.org/packages/MySqlConnector.Logging.log4net/), [Microsoft.Extensions.Logging](https://www.nuget.org/packages/MySqlConnector.Logging.Microsoft.Extensions.Logging/), [NLog](https://www.nuget.org/packages/MySqlConnector.Logging.NLog/), [Serilog](https://www.nuget.org/packages/MySqlConnector.Logging.Serilog/)
+* Azure.Storage.Queues: [GitHub](https://github.com/Azure/azure-sdk-for-net) | [Nuget](Azure.Storage.Queues)
+* Microsoft.Extensions.Logging: [Nuget](https://www.nuget.org/packages/Microsoft.Extensions.Logging)
+* DryIoc: [GitHub](https://github.com/dadhi/DryIoc) | [Nuget](https://www.nuget.org/packages/DryIoc.dll/)
+* Polly: [GitHub](https://github.com/App-vNext/Polly) | [Nuget](https://www.nuget.org/packages/polly)
+
 
 ## Feedback
 
-MySqlConnector is released as open source under the [MIT license](https://github.com/mysql-net/MySqlConnector/blob/master/LICENSE). Bug reports and contributions are welcome at [the GitHub repository](https://github.com/mysql-net/MySqlConnector).
+ServerCommands is released as open source under the [MIT license](https://github.com/hgjura/ServerTools.ServerCommands/blob/main/LICENSE). Bug reports and contributions are welcome at [the GitHub repository](https://github.com/hgjura/ServerTools.ServerCommands/issues).

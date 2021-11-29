@@ -52,26 +52,9 @@
 
 ## About
 
-Project description
-<!-- > **[?]**
-> Provide general information about your project here.
-> What problem does it (intend to) solve?
-> What is the purpose of your project?
-> Why did you undertake it?
-> You don't have to answer all the questions - just the ones relevant to your project.
+ServerCommands facilitates running of units of code or commands remotely. It incorporates principles of messaging architectures used by most messaging tools and frameworks, like [Azure Service Bus](https://docs.microsoft.com/en-ca/azure/service-bus-messaging/), [AWS SQS](https://aws.amazon.com/sqs/), [RabbitMQ](https://www.rabbitmq.com/), or [Azure Storage Queues](https://docs.microsoft.com/en-ca/azure/storage/queues/storage-dotnet-how-to-use-queues?tabs=dotnet), [Apache Kafka](https://kafka.apache.org/) without any of the knowledge and configuration expertise to manage such installations and configurations. 
 
-<details>
-<summary>Screenshots</summary>
-<br>
-
-> **[?]**
-> Please provide your screenshots here.
-
-|                               Home Page                               |                               Login Page                               |
-| :-------------------------------------------------------------------: | :--------------------------------------------------------------------: |
-| <img src="docs/images/screenshot.png" title="Home Page" width="100%"> | <img src="docs/images/screenshot.png" title="Login Page" width="100%"> |
-
-</details> -->
+Currently, the library requires an Azure Storage account to run. But by no means this is a major dependency. All messaging services work very similarly, and the choice to use Azure Storage is purely for simplictiy and cost. Azure Storage provides both storage and queueing service at a minimal cost. In future iterations, and upon demand, versions of this library that work with all the other messaging services will be provided.  
 
 ### Built With
 - C# (NET 5.0)

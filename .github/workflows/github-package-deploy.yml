@@ -48,11 +48,11 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal
     
-    - name: Pack
+    - name: Pack CI
       if: github.event_name != 'release'
       run: dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
 
-    - name: Pack
+    - name: Pack Release
       if: github.event_name == 'release'
       run: |
           arrTag=(${GITHUB_REF//\// })
