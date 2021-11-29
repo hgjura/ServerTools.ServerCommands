@@ -95,9 +95,116 @@ Project description
 
 ## Usage
 
-> **[?]**
-> How does one go about using it?
-> Provide various use cases and code examples here.
+To post a remote command you first will need to create a command (in your own code) that inherits from ```IRemoteCommand```.  The interface ```IRemoteCommand``` will ask you to implement two elements:
+* ```RequiresResponse```: Is a property that returns a ```bool``` that indicates if this command will retunr a response or not. More about this in the extended documentation here. For now just return ```false```.
+* ```ExecuteAsync```: Is the method that gets executed remotely. This methid accepts two parameters of type ```dynamic```:
+	* ```command``` contains the context of the command, or the command parameters. Note that cannot be a mismatch between what the command expects to run and the properties of the ```command``` parameter. For example, this sample command (```AddNumbersCommand```) expects that properties ```Number1``` and ```Number2``` two to be present in the parametr command and be of type ```int```. If they are not, this command will fail the execution.
+	* ```meta``` contains metadata about the command. This is filled it by the library and mostly contains various ```DateTime.UtcNow``` timestamps as the command travels through the systems and goes through the stages. This is avaiable to you, but you don't have to do anything with it, unless you will deleve into more expert use-cases of correlation and ordering.
+
+This method returns a ```tuple``` of object of type 
+```(bool, Exception, dynamic, dynamic)``` containing four items.
+* ```Item1```: returns ```true/false``` depending if the command executed succesfully or not.
+* ```Item2```: in case ```Item1``` is false, this returns the Exception object, otherwise ```null```.
+* ```Item3```: returns a ```dynamic``` object that contains the command context of the response. This **must** be populated (be not ```null``` if property ```RequiresResponse``` is set to ```true```). Otherwise return null.
+* ```Item4```: returns a ```dynamic``` object that contains the metadata. This is when you may want to add additional metadata datapoints before returnig it to the caller. More about it in teh extended documentatino. This also **must** be populated (be not ```null``` if propertry ```RequiresResponse``` is set to ```true```). Otherwise return null.
+' ```true/false``` depending if the command executed succesfully or not.
+
+Also, **all** exceptions must be handled within the body of the ```ExecuteAsync```. Remember, these commads are executed remotely and asynchronously. There will be nothing ruturnd to you! An unhandled exception will simply put the command back in the queue, and it will be tried **five (5)** times and then it will be placed in a dead letter queue, where it will sit until you bring it back form there to handle it properly.
+
+See example: 
+
+```csharp
+public class AddNumbersCommand : IRemoteCommand
+{
+    public bool RequiresResponse => false;
+
+    public async Task<(bool, Exception, dynamic, dynamic)> ExecuteAsync(dynamic command, dynamic meta)
+    {
+		// must handle exceptions
+        try
+        {
+            int n1 = (int)command.Number1;
+            int n2 = (int)command.Number2;
+
+            int result = n1 + n2;
+			
+			// set the first item to true indicating success, set the rest to null
+            return await Task.FromResult<(bool, Exception, dynamic, dynamic)>((true, null, null, null));
+
+
+        }
+        catch (Exception ex)
+        {
+			// set the first item to false indicating failure, set second items to the Exception thrown, set the rest to null
+            return await Task.FromResult<(bool, Exception, dynamic, dynamic)>((false, ex, null, meta));
+        }
+    }
+}
+
+```
+
+
+Now that you have the command ready to be executed, you will need to post it to be executed remotely.
+
+Ini its simplest form, to post a command to the server it is simply four lines of code (four steps).
+* step 1: create an instance of the ```CommandContainer```. This is the IoC container that holds all registrations for the remote commands.
+* step 2: register the command you created above with the IoC container. In its simplest form, command have a parameterless constructor (like the sample above). But this is unrealistic as we want our commands to do rich and complex things, so go here to see how you can created commands with parameters and how to register them.
+* step 3: instantiate a ```Commands``` store object. This is the command center for your remote commands. It only had a handful of methods though, as the complexity is hidden internally. It requires a few parameters:
+	* first parameter, is the command container we just created
+	* second paremeter, is the Azure Storage account name, that the library will use in the back end. Note this is not the storage connaction string, it is only the account name, for example ```storage123```.      
+	* third parameter, is the Azure Storage account key. Note this is not the storage connaction string, it is only one of the two keys provided to you in the Azure portal.
+    
+
+```csharp
+var _container = new CommandContainer();
+
+_container.RegisterCommand<AddNumbersCommand>();
+
+var c = new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"));
+
+_ = await c.PostCommand<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
+```
+
+Once you post the command, you will need to create an executing context to execute them. Usually this would run in an Azuer Function, an AKS container, a Windows service, a commandline, or other, and would run in a loop or in a schedule.
+
+To execute the commands queued in a server you will need to create an executing context (a ```Commands``` object) and register **all** the commands that are expected to have been registered remotely. Failure to register the commands that are queed would meen that the executing context will receive a command that it cannot recognize and process, and as such it will send it eventually to the dead letter queue.
+
+Since in our sample there is only one command, we are doing the registration in-line. In your code, as you add more and more commands, you may want to mantain a utility fucntion of class that register commands as you add them, and all their dependencies, and returns a fully registered command conatinerer object to be pased to the ```Commands```.
+
+The ```ExecuteCommands`` takes no parameters, and returns a ```tuple``` of object of type 
+```(bool, Exception, dynamic, dynamic)``` containing three items.
+
+* ```Item1```: returns ```true/false``` depending if the command executed **all** the command in the queue succesfully or not.
+* ```Item2```: contains the number of commands executed.
+* ```Item3```: returns a ```dynamic``` object that contains the command context of the response. This **must** be populated (be not ```null``` if property ```RequiresResponse``` is set to ```true```). Otherwise return null.
+* ```Item4```: returns a ```dynamic``` object that contains the metadata. This is when you may want to add additional metadata datapoints before returnig it to the caller. More about it in teh extended documentatino. This also **must** be populated (be not ```null``` if propertry ```RequiresResponse``` is set to ```true```). Otherwise return null.
+' ```true/false``` depending if the command executed succesfully or not.
+
+
+```csharp
+var _container = new CommandContainer();
+
+_container.RegisterCommand<AddNumbersCommand>();
+
+var c = new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"));
+
+var result = await c.ExecuteCommands();
+
+//check if something was wrong or if any items were processed at all
+Assert.IsTrue(!result.Item1);
+
+//check if 1 or more items were processed
+Assert.IsTrue(result.Item2 > 0);
+
+//check if there was any errors
+Assert.IsTrue(result.Item3.Count > 0); //This value keeps the list of error messages that were encountered. After retrying 5 times the command is moved to the deadletterqueue.
+
+```
+
+And that's that!
+
+For more detailed documentation and more complex use cases head to the offical documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If theer are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=hgjura&labels=question&title=ask%3A+) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=hgjura&labels=request&title=newfeature%3A+) do not hesitate to post them there.
+
 
 ## Roadmap
 
@@ -160,8 +267,8 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-## Acknowledgements
+<!-- ## Acknowledgements
 
 > **[?]**
 > If your work was funded by any organization or institution, acknowledge their support here.
-> In addition, if your work relies on other software libraries, or was inspired by looking at other work, it is appropriate to acknowledge this intellectual debt too.
+> In addition, if your work relies on other software libraries, or was inspired by looking at other work, it is appropriate to acknowledge this intellectual debt too. -->

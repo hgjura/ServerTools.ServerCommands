@@ -18,7 +18,7 @@ namespace ServerTools.ServerCommands
         readonly long _MAX_DEQUEUE_COUNT_FOR_ERROR = 5;
 
         readonly ILogger _log;
-        readonly HttpClient _client;
+        //readonly HttpClient _client;
 
         readonly Queue<dynamic> queue = new Queue<dynamic>();
 
@@ -29,7 +29,7 @@ namespace ServerTools.ServerCommands
         
         Policy _policy;
 
-        public Commands(CommandContainer Container, string AccountName, string AccountKey, HttpClient Client, ILogger Log, Policy RetryPolicy = null, string QueueNamePrefix = null)
+        public Commands(CommandContainer Container, string AccountName, string AccountKey, ILogger Log = null, Policy RetryPolicy = null, string QueueNamePrefix = null)
         {
             container = Container;
 
@@ -43,14 +43,13 @@ namespace ServerTools.ServerCommands
             qsc_responses.CreateIfNotExists();
             qsc_responses_deadletter.CreateIfNotExists();
 
-            _client ??= Client;
             _log ??= Log;
 
             this._policy = RetryPolicy ?? Policy
                .Handle<Exception>()
                .WaitAndRetry(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (result, timeSpan, retryCount, context) =>
                {
-                   Log.LogWarning($"Calling service failed [{result.Message} | {result.InnerException?.Message}]. Waiting {timeSpan} before next retry. Retry attempt {retryCount}.");
+                   _log?.LogWarning($"Calling service failed [{result.Message} | {result.InnerException?.Message}]. Waiting {timeSpan} before next retry. Retry attempt {retryCount}.");
                });
 
         }
@@ -126,12 +125,12 @@ namespace ServerTools.ServerCommands
                         result.Item1 = false;
                         result.Item3.Add($"{m.MessageId}:{b.Item2?.Message}:{b.Item2?.InnerException?.Message}");
 
-                        _log.LogError(b.Item2?.Message);
-                        _log.LogWarning($"Message could not be processed: [{qsc_requests.Name}] {m.MessageText}");
+                        _log?.LogError(b.Item2?.Message);
+                        _log?.LogWarning($"Message could not be processed: [{qsc_requests.Name}] {m.MessageText}");
                         
                         if (m.DequeueCount >= _MAX_DEQUEUE_COUNT_FOR_ERROR)
                         {
-                            _log.LogWarning($"Message {m.MessageId} will be moved to dead letter queue.");
+                            _log?.LogWarning($"Message {m.MessageId} will be moved to dead letter queue.");
 
                            _ = await _PostCommandToDeadLetter(m, b.Item2);
                            _ = await qsc_requests.DeleteMessageAsync(m.MessageId, m.PopReceipt);
@@ -140,7 +139,7 @@ namespace ServerTools.ServerCommands
                 }
 
                 QueueProperties properties = await qsc_requests.GetPropertiesAsync();
-                _log.LogWarning($"[{qsc_requests.Name}] {properties.ApproximateMessagesCount} messages left in queue.");
+                _log?.LogWarning($"[{qsc_requests.Name}] {properties.ApproximateMessagesCount} messages left in queue.");
             }
 
             return result;
@@ -228,7 +227,7 @@ namespace ServerTools.ServerCommands
                     }
                     else 
                     {
-                        log.LogError($"Command type [{type}] is not registered with the container and cannot be processed. Skipping.");
+                        log?.LogError($"Command type [{type}] is not registered with the container and cannot be processed. Skipping.");
                         throw new ApplicationException($"Command type [{type}] is not registered with the container and cannot be processed.");
                     }                        
                 }
@@ -323,12 +322,12 @@ namespace ServerTools.ServerCommands
                         result.Item1 = false;
                         result.Item3.Add($"{m.MessageId}:{b.Item2?.Message}:{b.Item2?.InnerException?.Message}");
 
-                        _log.LogError(b.Item2?.Message);
-                        _log.LogWarning($"Message could not be processed: [{qsc_responses.Name}] {m.MessageText}");
+                        _log?.LogError(b.Item2?.Message);
+                        _log?.LogWarning($"Message could not be processed: [{qsc_responses.Name}] {m.MessageText}");
 
                         if (m.DequeueCount >= _MAX_DEQUEUE_COUNT_FOR_ERROR)
                         {
-                            _log.LogWarning($"Message {m.MessageId} will be moved to dead letter queue.");
+                            _log?.LogWarning($"Message {m.MessageId} will be moved to dead letter queue.");
 
                             _ = await _PostResponseToDeadLetter(m, b.Item2);
                             _ = await qsc_responses.DeleteMessageAsync(m.MessageId, m.PopReceipt);
@@ -337,7 +336,7 @@ namespace ServerTools.ServerCommands
                 }
 
                 QueueProperties properties = await qsc_responses.GetPropertiesAsync();
-                _log.LogWarning($"[{qsc_responses.Name}] {properties.ApproximateMessagesCount} messages left in queue.");
+                _log?.LogWarning($"[{qsc_responses.Name}] {properties.ApproximateMessagesCount} messages left in queue.");
             }
 
             return result;
@@ -377,7 +376,7 @@ namespace ServerTools.ServerCommands
                     }
                     else
                     {
-                        log.LogError($"Response type [{type}] is not registered with the container and cannot be processed. Skipping.");
+                        log?.LogError($"Response type [{type}] is not registered with the container and cannot be processed. Skipping.");
                         throw new ApplicationException($"Response type [{type}] is not registered with the container and cannot be processed.");
                     }
                 }

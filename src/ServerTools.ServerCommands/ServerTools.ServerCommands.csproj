@@ -6,7 +6,14 @@
     <Authors>Herald Gjura</Authors>
     <Company>ServerTools</Company>
     <Copyright>Copyright 2021 (c) ServerTools. All rights reserved.</Copyright>
-    <Description>Description of the package.</Description>
+    <Description>
+      ServerCommands facilitates running of units of code or commands remotely. 
+      It incorporates principles of messaging architectures used by most messaging tools and frameworks, 
+      like [Azure Service Bus](https://docs.microsoft.com/en-ca/azure/service-bus-messaging/), 
+      [AWS SQS](https://aws.amazon.com/sqs/), [RabbitMQ](https://www.rabbitmq.com/), 
+      or [Azure Storage Queues](https://docs.microsoft.com/en-ca/azure/storage/queues/storage-dotnet-how-to-use-queues?tabs=dotnet), 
+      [Apache Kafka](https://kafka.apache.org/) without any of the knowledge and configuration expertise to manage such installations and configurations. 
+    </Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>Azure, Remote Comamnds, Messaging, Queues, Service Bus</PackageTags>
     <RepositoryUrl>https://github.com/hgjura/ServerTools.ServerCommands</RepositoryUrl>
