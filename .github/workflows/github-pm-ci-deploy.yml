@@ -39,11 +39,11 @@ jobs:
     
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./src/${PROJECT_NAME}/
+      working-directory: ./src/${PROJECT_NAME}
     
     - name: Build
       run: dotnet build --no-restore --configuration Release
-      working-directory: ./src/${PROJECT_NAME}/
+      working-directory: ./src/${PROJECT_NAME}
     
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal
@@ -52,7 +52,7 @@ jobs:
       run: dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
     
     - name: Push
-      run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/hgjura/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push *.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
       # env:
       #   GH_TOKEN: ${{secrets.GH_TOKEN}}
 
