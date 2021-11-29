@@ -74,8 +74,7 @@ jobs:
   deploy:
     needs: build
     if: github.event_name == 'release'
-    runs-on: ubuntu-latest
-    
+    runs-on: ubuntu-latest    
     steps:
       - name: Download Artifact
         uses: actions/download-artifact@v1
@@ -88,13 +87,13 @@ jobs:
         dotnet-version: 5.0.x
 
     - name: Create Release NuGet package
-        run: |
-          arrTag=(${GITHUB_REF//\// })
-          VERSION="${arrTag[2]}"
-          echo Version: $VERSION
-          VERSION="${VERSION//v}"
-          echo Clean Version: $VERSION
-          dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
+      run: |
+        arrTag=(${GITHUB_REF//\// })
+        VERSION="${arrTag[2]}"
+        echo Version: $VERSION
+        VERSION="${VERSION//v}"
+        echo Clean Version: $VERSION
+        dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
 
-      - name: Push
-          run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
+    - name: Push
+      run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
