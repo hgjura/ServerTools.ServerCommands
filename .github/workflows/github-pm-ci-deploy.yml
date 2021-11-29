@@ -69,7 +69,7 @@ jobs:
     #     path: ./**/*.nupkg
   
     - name: Push
-        run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
 
 
 
