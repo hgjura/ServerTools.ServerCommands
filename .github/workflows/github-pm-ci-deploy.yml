@@ -61,63 +61,11 @@ jobs:
           VERSION="${VERSION//v}"
           echo Clean Version: $VERSION
           dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
-
-    # - name: Upload Artifact
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: nupkg
-    #     path: ./**/*.nupkg
   
-    - name: Push
+    - name: Publish to GitHub PM
       run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
 
+    - name: Publish to Nuget PM
+      if: github.event_name == 'release'
+      run: dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY}
 
-
-
-  # prerelease:
-  #   needs: build
-  #   if: github.event_name != 'release'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download Artifact
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: nupkg
-    
-  #     - name: Push
-  #       run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
-
-  # release:
-  #   needs: build
-  #   if: github.event_name == 'release'
-  #   runs-on: ubuntu-latest    
-  #   steps:
-  #     - name: Download Artifact
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: nupkg
-
-  #     - name: Setup .NET
-  #       uses: actions/setup-dotnet@v1
-  #       with:
-  #         dotnet-version: 5.0.x
-          
-  #     - name: Restore dependencies
-  #       run: dotnet restore
-  #       working-directory: ./src/${{ env.PROJECT_NAME }}/
-    
-  #     - name: Build
-  #       run: dotnet build --no-restore --configuration Release
-  #       working-directory: ./src/${{ env.PROJECT_NAME }}/
-
-  #     - name: Create Release NuGet package
-  #       run: |
-  #         arrTag=(${GITHUB_REF//\// })
-  #         VERSION="${arrTag[2]}"
-  #         echo Version: $VERSION
-  #         VERSION="${VERSION//v}"
-  #         echo Clean Version: $VERSION
-  #         dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
-
-  #     - name: Push
-  #       run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
