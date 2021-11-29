@@ -34,7 +34,7 @@ jobs:
     - name: Push
       run: dotnet nuget push ServerTools.ServerCommands.${GITHUB_RUN_ID}.nupkg --source https://nuget.pkg.github.com/hgjura/index.json --api-key ${GH_TOKEN}
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GH_TOKEN: ${{secrets.GH_TOKEN}}
 
         
 
