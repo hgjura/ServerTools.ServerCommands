@@ -2,14 +2,40 @@ on:
   push:
     branches:
     - main
+  pull_request:
+    branches:
+    - main
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ./src/
+    
     - name: Build
-      run: dotnet build --configuration Release
+      run: dotnet build --no-restore --configuration Release
+      working-directory: ./src/
+    
     - name: Test
-      run: dotnet test --configuration Release --no-build
+      run: dotnet test --configuration Release --no-build --verbosity normal
+    
+    - name: Pack
+      run: dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
+    
+    - name: Push
+      run: dotnet nuget push ServerTools.ServerCommands.${GITHUB_RUN_ID}.nupkg --source https://nuget.pkg.github.com/hgjura/index.json --api-key ${GH_TOKEN}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+        
+
+
