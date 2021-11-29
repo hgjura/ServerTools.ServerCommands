@@ -32,7 +32,7 @@ jobs:
       run: dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
     
     - name: Push
-      run: dotnet nuget push ServerTools.ServerCommands.${GITHUB_RUN_ID}.nupkg --source https://nuget.pkg.github.com/hgjura/index.json --api-key ${GH_TOKEN}
+      run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/hgjura/index.json --api-key ${GH_TOKEN}
       env:
         GH_TOKEN: ${{secrets.GH_TOKEN}}
 
