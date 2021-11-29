@@ -42,7 +42,7 @@ jobs:
       
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./src/${{ env.$PROJECT_NAME }}/
+      working-directory: ./src/${{ env.PROJECT_NAME }}/
     
     # - name: Build
     #   run: dotnet build --no-restore --configuration Release
