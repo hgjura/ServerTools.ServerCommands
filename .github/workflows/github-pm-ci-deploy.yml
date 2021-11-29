@@ -1,3 +1,4 @@
+
 on:
   push:
     branches:
@@ -5,6 +6,25 @@ on:
   pull_request:
     branches:
     - main
+  release:
+    branches:
+      - main
+    types:
+      - published
+env:
+  # Stop wasting time caching packages
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  # Disable sending usage data to Microsoft
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # Project name to pack and publish
+  PROJECT_NAME: ServerTools.ServerCommands
+  # GitHub Packages Feed settings
+  GITHUB_FEED: https://nuget.pkg.github.com/hgjura/
+  GITHUB_USER: hgjura
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # Official NuGet Feed settings
+  NUGET_FEED: https://api.nuget.org/v3/index.json
+  NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,11 +39,11 @@ jobs:
     
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./src/
+      working-directory: ./src/$PROJECT_NAME/
     
     - name: Build
       run: dotnet build --no-restore --configuration Release
-      working-directory: ./src/
+      working-directory: ./src/$PROJECT_NAME/
     
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal
@@ -32,9 +52,9 @@ jobs:
       run: dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
     
     - name: Push
-      run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/hgjura/index.json --api-key ${GH_TOKEN}
-      env:
-        GH_TOKEN: ${{secrets.GH_TOKEN}}
+      run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/hgjura/index.json --api-key ${GITHUB_TOKEN}
+      # env:
+      #   GH_TOKEN: ${{secrets.GH_TOKEN}}
 
         
 
