@@ -37,6 +37,9 @@ jobs:
       with:
         dotnet-version: 5.0.x
 
+    - name: List files
+      uses: the-coding-turtle/ga-file-list@v0.2
+
     - name: Restore dependencies
       run: dotnet restore
       working-directory: ./src/
