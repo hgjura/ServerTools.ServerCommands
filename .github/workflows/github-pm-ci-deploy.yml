@@ -42,11 +42,11 @@ jobs:
       
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: /src/$PROJECT_NAME/
+      working-directory: "./src/$PROJECT_NAME/"
     
     # - name: Build
     #   run: dotnet build --no-restore --configuration Release
-    #   working-directory: ./src/ServerTools.ServerCommands/
+    #   working-directory: "./src/ServerTools.ServerCommands/"
     
     # - name: Test
     #   run: dotnet test --configuration Release --no-build --verbosity normal
