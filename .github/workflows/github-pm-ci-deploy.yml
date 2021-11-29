@@ -37,24 +37,27 @@ jobs:
       with:
         dotnet-version: 5.0.x
 
-    - name: Restore dependencies
-      run: dotnet restore
-      working-directory: ./src/$PROJECT_NAME/
+    - name: Echo
+      run: echo ./src/$PROJECT_NAME/
+      
+    # - name: Restore dependencies
+    #   run: dotnet restore
+    #   working-directory: ./src/ServerTools.ServerCommands/
     
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
-      working-directory: ./src/$PROJECT_NAME/
+    # - name: Build
+    #   run: dotnet build --no-restore --configuration Release
+    #   working-directory: ./src/ServerTools.ServerCommands/
     
-    - name: Test
-      run: dotnet test --configuration Release --no-build --verbosity normal
+    # - name: Test
+    #   run: dotnet test --configuration Release --no-build --verbosity normal
     
-    - name: Pack
-      run: dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
+    # - name: Pack
+    #   run: dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
     
-    - name: Push
-      run: dotnet nuget push *.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
-      # env:
-      #   GH_TOKEN: ${{secrets.GH_TOKEN}}
+    # - name: Push
+    #   run: dotnet nuget push *.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
+    #   # env:
+    #   #   GH_TOKEN: ${{secrets.GH_TOKEN}}
 
         
 
