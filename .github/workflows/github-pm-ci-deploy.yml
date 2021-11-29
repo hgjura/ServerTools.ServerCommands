@@ -36,17 +36,17 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-    - name: Open Web Client Directory
-        working-directory: ./src/${PROJECT_NAME}
+    - name: Open Directory
+        working-directory: ./src
         run: |
           ls -la
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./src/${PROJECT_NAME}
+      working-directory: ./src/${PROJECT_NAME}/
     
     - name: Build
       run: dotnet build --no-restore --configuration Release
-      working-directory: ./src/${PROJECT_NAME}
+      working-directory: ./src/${PROJECT_NAME}/
     
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal
