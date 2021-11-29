@@ -61,11 +61,11 @@ jobs:
     needs: build
     if: github.event_name != 'release'
     runs-on: ubuntu-latest
-        steps:
-          - name: Download Artifact
-            uses: actions/download-artifact@v1
-            with:
-              name: nupkg
+    steps:
+    - name: Download Artifact
+    uses: actions/download-artifact@v1
+      with:
+        name: nupkg
     - name: Push
         run: dotnet nuget push *.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
 
