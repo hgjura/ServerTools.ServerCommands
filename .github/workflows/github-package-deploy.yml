@@ -48,7 +48,9 @@ jobs:
       working-directory: ./src/${{ env.PROJECT_NAME }}/
     
     - name: Test
-      run: dotnet test ServerTools.ServerCommands.Tests.dll -v q --no-build
+      run: |
+        ls * 
+        dotnet test ServerTools.ServerCommands.Tests.dll -v q --no-build
       working-directory: ./tests/${{ env.PROJECT_NAME }}.Tests/bin/Release/net5.0/ServerTools.ServerCommands.dll
 
     - name: Pack CI
