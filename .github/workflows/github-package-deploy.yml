@@ -44,10 +44,12 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release
       working-directory: ./src/${{ env.PROJECT_NAME }}/
+      working-directory: ./src/${{ env.PROJECT_NAME }}/
     
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal
-    
+      working-directory: ./src/${{ env.PROJECT_NAME }}.Tests/
+      
     - name: Pack CI
       if: github.event_name != 'release'
       run: dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
