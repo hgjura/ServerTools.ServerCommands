@@ -47,7 +47,7 @@ jobs:
     
     - name: Test
       run: |
-        dotnet test *.csproj --configuration Release  --no-build --verbosity quiet --list-tests
+        dotnet test *.csproj --configuration Release --verbosity quiet --list-tests
       working-directory: ./tests/${{ env.PROJECT_NAME }}.Tests/
 
     - name: Pack CI
