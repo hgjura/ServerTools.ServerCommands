@@ -20,7 +20,7 @@ namespace ServerTools.ServerCommands.Tests
         [TestMethod]
         public void A1010_TestInitializedContainerIsNotNull()
         {
-            Assert.IsNull(_container);
+            Assert.IsNotNull(_container);
         }
     }
 }
