@@ -55,11 +55,15 @@ ServerCommands facilitates running of units of code or commands remotely. It inc
 
 Currently, the library requires an Azure Storage account to run. But by no means this is a major dependency. All messaging services work very similarly, and the choice to use Azure Storage is purely for simplictiy and cost. Azure Storage provides both storage and queueing service at a minimal cost. In future iterations, and upon demand, versions of this library that work with all the other messaging services will be provided.  
 
+- [Release Notes](https://github.com/hgjura/ServerTools.ServerCommands/releases/tag/v0.0.2-preview2) :: [Previous Versions](https://github.com/hgjura/ServerTools.ServerCommands/blob/master/src/ServerTools.ServerCommands/nuget-releasenotes.md)
+
 ### Built With
 - C# (NET 5.0)
 - Azure Sdk (Azure Storage Queues)
 - DryIoc
 - Polly
+
+
 
 ## Getting Started
 
