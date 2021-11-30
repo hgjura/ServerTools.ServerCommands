@@ -17,7 +17,7 @@
     <PackageIconUrl>https://github.com/hgjura/ServerTools.ServerCommands/master/.github/icon-120x120.png</PackageIconUrl>
     <PackageIcon>nuget_logo_120-120.png</PackageIcon>
     <PackageReadmeFile>nuget-readme.md</PackageReadmeFile>
-    <PackageReleaseNotes>nuget-releasenotes.md<PackageReleaseNotes/>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/nuget-releasenotes.md"))</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <None Include="nuget_logo_120-120.png" Pack="true" PackagePath=""/>
