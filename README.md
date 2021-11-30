@@ -21,14 +21,13 @@
 <div align="center">
 <br />
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![NuGet Badge](https://buildstats.info/nuget/ServerTools.ServerCommands)](https://www.nuget.org/packages/ServerTools.ServerCommands/) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-ff69b4.svg?style=flat-square)](https://github.com/hgjura/ServerTools.ServerCommands/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) [![Gitter](https://badges.gitter.im/hgjura/ServerCommands.svg)](https://gitter.im/hgjura/ServerCommands?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-<!-- [![PRs welcome](https://img.shields.io/badge/PRs-welcome-ff69b4.svg?style=flat-square)](https://github.com/GITHUB_USERNAME/REPO_SLUG/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) -->
 [![code with hearth by Herald Gjura](https://img.shields.io/badge/%3C%2F%3E%20with%20%E2%99%A5%20by-hgjura-ff1414.svg?style=flat-square)](https://github.com/hgjura)
 
 </div>
 
-<!-- <details open="open">
+<details open="open">
 <summary>Table of Contents</summary>
 
 - [About](#about)
@@ -44,9 +43,9 @@
 - [Authors & contributors](#authors--contributors)
 - [Security](#security)
 - [License](#license)
-- [Acknowledgements](#acknowledgements)
+<!-- - [Acknowledgements](#acknowledgements) -->
 
-</details> -->
+</details>
 
 ---
 
@@ -58,23 +57,26 @@ Currently, the library requires an Azure Storage account to run. But by no means
 
 ### Built With
 - C# (NET 5.0)
-- Azure Sdk
-- DryIOC
-
-<!-- > **[?]**
-> Please provide the technologies that are used in the project. -->
+- Azure Sdk (Azure Storage Queues)
+- DryIoc
+- Polly
 
 ## Getting Started
 
 ### Prerequisites
-
-> **[?]**
-> What are the project requirements/dependencies?
+* Basic understanding of the Messaging Arhcitectures
+* Understanding of the Command pattern in software development
 
 ### Installation
+[![NuGet Badge](https://buildstats.info/nuget/ServerTools.ServerCommands)](https://www.nuget.org/packages/ServerTools.ServerCommands/)
 
-> **[?]**
-> Proceed to describe how to install and get started with the project.
+Add the [NuGet package](https://www.nuget.org/packages/ServerTools.ServerCommands/) to all the projects you want to use it in.
+
+* In Visual Studio - Tools > NuGet Package Manager > Manage Packages for Solution
+* Select the Browse tab, search for ServerCommands
+* Select ServerTools.ServerCommands
+* Install into each project within your solution
+
 
 ## Usage
 
@@ -196,6 +198,16 @@ See the [open issues](https://github.com/hgjura/ServerTools.ServerCommands/issue
 - [Top Feature Requests](https://github.com/hgjura/ServerTools.ServerCommands/issues?q=label%3Aenhancement+is%3Aopen+sort%3Areactions-%2B1-desc) (Add your votes using the 👍 reaction)
 - [Top Bugs](https://github.com/hgjura/ServerTools.ServerCommands/issues?q=is%3Aissue+is%3Aopen+label%3Abug+sort%3Areactions-%2B1-desc) (Add your votes using the 👍 reaction)
 - [Newest Bugs](https://github.com/hgjura/ServerTools.ServerCommands/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+
+### Top ten upcoming features  
+- [ ] Adopt the library to wrok with other backend services
+  - [ ] Azure Service Bus
+  - [ ] AWS SQS
+  - [ ] Apache Kafka
+  - [ ] Rabbit MQ
+- [x] Enable batching, batch processing and command correlations
+- [ ] Enable ordering and ordered processing through sessions
+
 
 ## Support
 
