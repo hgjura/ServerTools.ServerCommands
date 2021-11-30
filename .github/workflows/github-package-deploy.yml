@@ -47,7 +47,7 @@ jobs:
     
     - name: Test
       run: |
-        dotnet test *.csproj -v n --list-tests
+        dotnet test -v n
       working-directory: ./tests/${{ env.PROJECT_NAME }}.Tests/
 
     - name: Pack CI
