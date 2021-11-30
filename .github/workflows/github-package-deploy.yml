@@ -48,9 +48,7 @@ jobs:
       working-directory: ./src/${{ env.PROJECT_NAME }}/
     
     - name: Test
-      run: |
-        ls * 
-        dotnet test -v q
+      run: dotnet test --verbosity normal --no-restore --no-build --configuration Release
       working-directory: ./
 
     - name: Pack CI
