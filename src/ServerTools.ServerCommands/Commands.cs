@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ServerTools.ServerCommands
@@ -18,7 +19,6 @@ namespace ServerTools.ServerCommands
         readonly long _MAX_DEQUEUE_COUNT_FOR_ERROR = 5;
 
         readonly ILogger _log;
-        //readonly HttpClient _client;
 
         readonly Queue<dynamic> queue = new Queue<dynamic>();
 
@@ -144,6 +144,8 @@ namespace ServerTools.ServerCommands
 
             return result;
         }
+
+       
 
         #endregion
 
@@ -429,7 +431,23 @@ namespace ServerTools.ServerCommands
             return obj.GetType().GetProperty(name) != null;
         }
 
+        public async Task ClearCommandsAndResponsesWithoutExecutngThemAsync()
+        {
+            _ = await qsc_responses_deadletter.ClearMessagesAsync();
+            _ = await qsc_responses_deadletter.DeleteAsync();
 
+            _ = await qsc_responses_deadletter.ClearMessagesAsync();
+            _ = await qsc_responses_deadletter.DeleteAsync();
+
+            _ = await qsc_requests.ClearMessagesAsync();
+            _ = await qsc_requests.DeleteAsync();
+
+            _ = await qsc_responses.ClearMessagesAsync();
+            _ = await qsc_responses.DeleteAsync();
+
+            //this is needed since you cannot recreate a queue with same name for 30 seconds. Pausing for 35 seconds.
+            Thread.Sleep(35000);
+        }
 
 
         #endregion

@@ -14,14 +14,14 @@ To set up a development environment, please follow these steps:
 1. Clone the repo
 
    ```sh
-   git clone https://github.com/hgjura/command-pattern-with-queues
+   git clone https://github.com/hgjura/ServerTools.ServerCommands
    ```
 
 <!-- 2. TODO -->
 
 ## Issues and feature requests
 
-You've found a bug in the source code, a mistake in the documentation or maybe you'd like a new feature? You can help us by submitting an issue to our [GitHub Repository](https://github.com/hgjura/command-pattern-with-queues/issues). Before you create an issue, make sure you search the archive, maybe your question was already answered.
+You've found a bug in the source code, a mistake in the documentation or maybe you'd like a new feature? You can help us by submitting an issue to our [GitHub Repository](https://github.com/hgjura/ServerTools.ServerCommands/issues). Before you create an issue, make sure you search the archive, maybe your question was already answered.
 
 Please try to create bug reports that are:
 
@@ -35,7 +35,7 @@ Even better: You could submit a pull request with a fix or new feature!
 ## Pull request process
 
 1. Search our repository for open or closed
-[pull requests](https://github.com/hgjura/command-pattern-with-queues/pulls)
+[pull requests](https://github.com/hgjura/ServerTools.ServerCommands/pulls)
 that relates to your submission. You don't want to duplicate effort.
 2. Fork the project
 3. Create your feature branch (`git checkout -b feat/amazing_feature`)
