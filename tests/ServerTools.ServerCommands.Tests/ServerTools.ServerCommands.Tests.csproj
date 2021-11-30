@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\ServerTools.ServerCommands\ServerTools.ServerCommands.csproj" />
+    <ProjectReference Include="..\..\src\ServerTools.ServerCommands\ServerTools.ServerCommands.csproj" />
   </ItemGroup>
 
 </Project>
