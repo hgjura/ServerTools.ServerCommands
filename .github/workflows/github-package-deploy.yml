@@ -51,7 +51,7 @@ jobs:
       run: |
         ls * 
         dotnet test ServerTools.ServerCommands.Tests.dll -v q --no-build
-      working-directory: ./
+      working-directory: ./tests/ServerTools.ServerCommands.Tests
 
     - name: Pack CI
       if: github.event_name != 'release'
