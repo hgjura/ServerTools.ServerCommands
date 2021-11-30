@@ -4,7 +4,7 @@
 
 If there are any vulnerability in **ServerTools.ServerCommands** project, don't hesitate to _report them_.
 
-1. Use any of the [private contact addresses](https://github.com/hgjura/command-pattern-with-queues#support).
+1. Use any of the [private contact addresses](https://github.com/hgjura/ServerTools.ServerCommands#support).
 2. Describe the vulnerability.
 
 - If you have a fix, explain or attach it.

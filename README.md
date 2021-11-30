@@ -11,11 +11,11 @@
   <!-- <a href="#about"><strong>Explore the screenshots »</strong></a>
   <br />
   <br /> -->
-  <a href="https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=bug&template=CONTRIBUTING.md&title=bug%3A+">Report a Bug</a>
+  <a href="https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=01_bug_report.yml&title=%5BBUG%5D">Report a Bug</a>
   ·
-  <a href="https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=enhancement&template=02_FEATURE_REQUEST.md&title=feat%3A+">Request a Feature</a>
+  <a href="https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=02_feature_request.yml&title=%5BFEATURE+REQ%5D">Request a Feature</a>
   .
-  <a href="https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=question&template=04_SUPPORT_QUESTION.md&title=support%3A+">Ask a Question</a>
+  <a href="https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=03_question.yml&title=%5BQUERY%5D">Ask a Question</a>
 </div>
 
 <div align="center">
@@ -188,7 +188,7 @@ Assert.IsTrue(result.Item3.Count > 0); //This value keeps the list of error mess
 
 And that's that!
 
-For more detailed documentation and more complex use cases head to the offical documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If theer are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=hgjura&labels=question&title=ask%3A+) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=hgjura&labels=request&title=newfeature%3A+) do not hesitate to post them there.
+For more detailed documentation and more complex use cases head to the offical documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If there are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=03_question.yml&title=%5BQUERY%5D) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=02_feature_request.yml&title=%5BFEATURE+REQ%5D) do not hesitate to post them there.
 
 
 ## Roadmap
