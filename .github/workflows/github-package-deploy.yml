@@ -51,7 +51,7 @@ jobs:
       run: |
         ls * 
         dotnet test -v q
-      working-directory: ./tests/${{ env.PROJECT_NAME }}/.Tests/
+      working-directory: ./
 
     - name: Pack CI
       if: github.event_name != 'release'
