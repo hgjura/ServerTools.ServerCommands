@@ -46,12 +46,10 @@ jobs:
       working-directory: ./src/${{ env.PROJECT_NAME }}/
     
     - name: Test
-      run: | 
-        ls *
-        echo ./tests/${{ env.PROJECT_NAME }}.Tests/
+      run: |
         ls ./tests/${{ env.PROJECT_NAME }}.Tests/
-      # run: dotnet test --configuration Release --no-build --verbosity normal
-      # working-directory: ./tests/${{ env.PROJECT_NAME }}.Tests/
+        dotnet test --configuration Release --no-build --verbosity normal
+      working-directory: ./tests/${{ env.PROJECT_NAME }}.Tests/${{ env.PROJECT_NAME }}.Tests.csproj
 
     - name: Pack CI
       if: github.event_name != 'release'
