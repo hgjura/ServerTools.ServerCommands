@@ -42,8 +42,9 @@ jobs:
       working-directory: ./src/${{ env.PROJECT_NAME }}/
     
     - name: Build
-      run: dotnet build --no-restore --configuration Release
-      ls *
+      run: |
+        dotnet build --no-restore --configuration Release
+        ls *
       working-directory: ./src/${{ env.PROJECT_NAME }}/
     
     - name: Test
