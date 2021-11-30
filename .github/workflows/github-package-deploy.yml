@@ -47,9 +47,11 @@ jobs:
     
     - name: Test
       run: |
-        ls ./tests/
+        ls *
         echo " ------------------- "
-        ls ./tests/${{ env.PROJECT_NAME }}.Tests/
+        ls /tests/
+        echo " ------------------- "
+        ls /tests/${{ env.PROJECT_NAME }}.Tests/
         echo " ------------------- "
         dotnet test ${{ env.PROJECT_NAME }}.Tests.csproj --configuration Release --no-build --verbosity normal
       working-directory: ./tests/${{ env.PROJECT_NAME }}.Tests/
