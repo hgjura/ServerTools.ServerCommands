@@ -46,6 +46,12 @@ jobs:
         dotnet build --no-restore --configuration Release
       working-directory: ./src/${{ env.PROJECT_NAME }}/
     
+    - name: Set secrets for tests 
+      run: |
+        dotnet user-secrets set "StorageAccountName" ${{ secrets.ACCT_NAME }}
+        dotnet user-secrets set "StorageAccountKey" ${{ secrets.ACCT_KEY }}
+      working-directory: ./
+
     - name: Test
       run: |
         dotnet test --verbosity normal --configuration Release

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Debug;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -13,6 +14,20 @@ namespace ServerTools.ServerCommands.Tests
         /// <summary>
         /// Execute once before the test-suite
         /// </summary>
+        /// 
+
+        IConfiguration Configuration { get; set; }
+
+        public UnitTestsForServerCommands()
+        {
+            var builder = new ConfigurationBuilder()
+                .AddUserSecrets<UnitTestsForServerCommands>(true)
+                .AddJsonFile("local.tests.settings.json");
+
+            Configuration = builder.Build();
+        }
+
+
         [ClassInitialize()]
         public static void InitTestSuite(TestContext testContext)
         {
@@ -24,15 +39,16 @@ namespace ServerTools.ServerCommands.Tests
         [ClassCleanup()]
         public static void CleanTestSuite()
         {
-           new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), null, QueueNamePrefix: _queueNamePrefix).Clear();
+           //new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), null, QueueNamePrefix: _queueNamePrefix).Clear();
         }
 
 
         [TestMethod]
         public void A1010_TestInitializedContainerIsNotNull()
         {
-            _ = new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), null, QueueNamePrefix: _queueNamePrefix);
-            Assert.IsNotNull(_container);
+            Assert.IsNotNull(Configuration["StorageAccountName"]);
+            Assert.IsNotNull(Configuration["StorageAccountKey"]);
+            //Assert.IsNotNull(_container);
         }
 
         [TestMethod]
