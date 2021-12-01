@@ -18,7 +18,7 @@ namespace ServerTools.ServerCommands.Tests
         {
             _container = new CommandContainer();
             _queueNamePrefix = nameof(UnitTestsForServerCommands).ToLower();
-            _ = new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), null, QueueNamePrefix: _queueNamePrefix);
+            //_ = new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), null, QueueNamePrefix: _queueNamePrefix);
         }
 
         [ClassCleanup()]
@@ -31,6 +31,7 @@ namespace ServerTools.ServerCommands.Tests
         [TestMethod]
         public void A1010_TestInitializedContainerIsNotNull()
         {
+            _ = new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), null, QueueNamePrefix: _queueNamePrefix);
             Assert.IsNotNull(_container);
         }
 
@@ -114,6 +115,8 @@ namespace ServerTools.ServerCommands.Tests
 
             //this should not fail as it has a valid storage account key: a string64 encoded
             Validators.ValidateNameForAzureStorageAccountKey("/jTXyUjLpws9kUjoxWc1WT68L06FwhfvkLHdKqWfM7SxViWlcLAElo1qOCpNieyjtUkS6u8+");
+
+            new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), null, QueueNamePrefix: _queueNamePrefix).Clear();
         }
 
 
