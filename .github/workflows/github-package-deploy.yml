@@ -54,7 +54,7 @@ jobs:
 
     - name: Test
       run: |
-        dotnet test --verbosity quiet --configuration Release
+        dotnet test --verbosity minimal --configuration Release
       working-directory: ./
 
     - name: Pack CI
