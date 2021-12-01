@@ -50,7 +50,7 @@ jobs:
       run: |
         dotnet user-secrets set "StorageAccountName" ${{ secrets.ACCT_NAME }}
         dotnet user-secrets set "StorageAccountKey" ${{ secrets.ACCT_KEY }}
-      working-directory: ./
+      working-directory: ./tests/ServerTools.ServerCommands.Tests/
 
     - name: Test
       run: |
