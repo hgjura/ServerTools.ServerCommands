@@ -45,7 +45,7 @@ namespace ServerTools.ServerCommands.Tests
         [TestMethod]
         public void A1000_TestValidateSecretsAreNotNull()
         {
-            Assert.IsNotNull(Configuration["StorageAccountName"]);
+            Assert.IsNotNull(Configuration["StorageAccountNameX"]);
             Assert.IsNotNull(Configuration["StorageAccountKey"]);
         }
 
