@@ -3,13 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [0.0.1] - 2021/11/30
+## [1.0.0] - 2021/12/01
 ### Added
-### Changed
-### Removed
-- This CHANGELOG file      
-
-
+- Validation of parameters when creating Commands
+- Clear() method on Commands that clears out commands and responses, without executing them, as well all the corresponding queues  
 
 
 

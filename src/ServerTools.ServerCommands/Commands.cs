@@ -15,42 +15,24 @@ namespace ServerTools.ServerCommands
 {
     public class Commands
     {
-        readonly CommandContainer container;
         readonly long _MAX_DEQUEUE_COUNT_FOR_ERROR = 5;
-
-        readonly ILogger _log;
-
         readonly Queue<dynamic> queue = new Queue<dynamic>();
 
-        readonly QueueClient qsc_requests;
-        readonly QueueClient qsc_requests_deadletter;
-        readonly QueueClient qsc_responses;
-        readonly QueueClient qsc_responses_deadletter;
-        
+        CommandContainer container;
+        ILogger _log;
         Policy _policy;
+        QueueClient qsc_requests;
+        QueueClient qsc_requests_deadletter;
+        QueueClient qsc_responses;
+        QueueClient qsc_responses_deadletter;
+        
+        
 
         public Commands(CommandContainer Container, string AccountName, string AccountKey, ILogger Log = null, Policy RetryPolicy = null, string QueueNamePrefix = null)
         {
-            container = Container;
+            _Initialize(Container, AccountName, AccountKey, Log, RetryPolicy, QueueNamePrefix);
 
-            qsc_requests ??= new QueueClient(new Uri($"https://{AccountName}.queue.core.windows.net/{(string.IsNullOrEmpty(QueueNamePrefix) ? "command-requests" : $"{QueueNamePrefix}-requests")}"), new StorageSharedKeyCredential(AccountName, AccountKey));
-            qsc_requests_deadletter ??= new QueueClient(new Uri($"https://{AccountName}.queue.core.windows.net/{(string.IsNullOrEmpty(QueueNamePrefix) ? "command-requests-deadletter" : $"{QueueNamePrefix}-requests-deadletter")}"), new StorageSharedKeyCredential(AccountName, AccountKey));
-            qsc_responses ??= new QueueClient(new Uri($"https://{AccountName}.queue.core.windows.net/{(string.IsNullOrEmpty(QueueNamePrefix) ? "command-responses" : $"{QueueNamePrefix}-responses")}"), new StorageSharedKeyCredential(AccountName, AccountKey));
-            qsc_responses_deadletter ??= new QueueClient(new Uri($"https://{AccountName}.queue.core.windows.net/{(string.IsNullOrEmpty(QueueNamePrefix) ? "command-responses-deadletter" : $"{QueueNamePrefix}-responses-deadletter")}"), new StorageSharedKeyCredential(AccountName, AccountKey));
-
-            qsc_requests.CreateIfNotExists();
-            qsc_requests_deadletter.CreateIfNotExists();
-            qsc_responses.CreateIfNotExists();
-            qsc_responses_deadletter.CreateIfNotExists();
-
-            _log ??= Log;
-
-            this._policy = RetryPolicy ?? Policy
-               .Handle<Exception>()
-               .WaitAndRetry(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (result, timeSpan, retryCount, context) =>
-               {
-                   _log?.LogWarning($"Calling service failed [{result.Message} | {result.InnerException?.Message}]. Waiting {timeSpan} before next retry. Retry attempt {retryCount}.");
-               });
+            
 
         }
 
@@ -431,22 +413,62 @@ namespace ServerTools.ServerCommands
             return obj.GetType().GetProperty(name) != null;
         }
 
-        public async Task ClearCommandsAndResponsesWithoutExecutngThemAsync()
+
+
+
+        private void _Initialize(CommandContainer Container, string AccountName, string AccountKey, ILogger Log = null, Policy RetryPolicy = null, string QueueNamePrefix = null)
         {
-            _ = await qsc_responses_deadletter.ClearMessagesAsync();
-            _ = await qsc_responses_deadletter.DeleteAsync();
+            Validators.ValidateContainer(Container);
+            container = Container;
 
-            _ = await qsc_responses_deadletter.ClearMessagesAsync();
-            _ = await qsc_responses_deadletter.DeleteAsync();
+            var q_name_reqs = $"{QueueNamePrefix.NullIfEmptyOrWhitespace() ?? "cmd"}-reqs";
+            var q_name_reqs_dlq = $"{QueueNamePrefix.NullIfEmptyOrWhitespace() ?? "cmd"}-reqs-dlq";
+            var q_name_resp = $"{QueueNamePrefix.NullIfEmptyOrWhitespace() ?? "cmd"}-resp";
+            var q_name_resp_dlq = $"{QueueNamePrefix.NullIfEmptyOrWhitespace() ?? "cmd"}-resp-dlq";
 
-            _ = await qsc_requests.ClearMessagesAsync();
-            _ = await qsc_requests.DeleteAsync();
+            Validators.ValidateNameForAzureStorage(AccountName);
+            Validators.ValidateNameForAzureStorageAccountKey(AccountKey);
 
-            _ = await qsc_responses.ClearMessagesAsync();
-            _ = await qsc_responses.DeleteAsync();
+            Validators.ValidateNameForAzureStorageQueue(q_name_reqs);
+            Validators.ValidateNameForAzureStorageQueue(q_name_reqs_dlq);
+            Validators.ValidateNameForAzureStorageQueue(q_name_resp);
+            Validators.ValidateNameForAzureStorageQueue(q_name_resp_dlq);
+
+            qsc_requests ??= new QueueClient(new Uri($"https://{AccountName}.queue.core.windows.net/{q_name_reqs}"), new StorageSharedKeyCredential(AccountName, AccountKey));
+            qsc_requests_deadletter ??= new QueueClient(new Uri($"https://{AccountName}.queue.core.windows.net/{q_name_reqs_dlq}"), new StorageSharedKeyCredential(AccountName, AccountKey));
+            qsc_responses ??= new QueueClient(new Uri($"https://{AccountName}.queue.core.windows.net/{q_name_resp}"), new StorageSharedKeyCredential(AccountName, AccountKey));
+            qsc_responses_deadletter ??= new QueueClient(new Uri($"https://{AccountName}.queue.core.windows.net/{q_name_resp_dlq}"), new StorageSharedKeyCredential(AccountName, AccountKey));
+
+            _ = qsc_requests.CreateIfNotExists();
+            _ = qsc_requests_deadletter.CreateIfNotExists();
+            _ = qsc_responses.CreateIfNotExists();
+            _ = qsc_responses_deadletter.CreateIfNotExists();
+
+            _log ??= Log;
+
+            _policy = RetryPolicy ?? Policy
+               .Handle<Exception>()
+               .WaitAndRetry(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (result, timeSpan, retryCount, context) =>
+               {
+                   _log?.LogWarning($"Calling service failed [{result.Message} | {result.InnerException?.Message}]. Waiting {timeSpan} before next retry. Retry attempt {retryCount}.");
+               });
+        }
+        public void Clear(bool WaitForQueuesToClear = false)
+        {
+            _ = qsc_requests_deadletter.ClearMessages();
+            _ = qsc_requests_deadletter.Delete();
+
+            _ = qsc_responses_deadletter.ClearMessages();
+            _ = qsc_responses_deadletter.Delete();
+
+            _ = qsc_requests.ClearMessages();
+            _ = qsc_requests.Delete();
+
+            _ = qsc_responses.ClearMessages();
+            _ = qsc_responses.Delete();
 
             //this is needed since you cannot recreate a queue with same name for 30 seconds. Pausing for 35 seconds.
-            Thread.Sleep(35000);
+            if(WaitForQueuesToClear) Thread.Sleep(35000);
         }
 
 
