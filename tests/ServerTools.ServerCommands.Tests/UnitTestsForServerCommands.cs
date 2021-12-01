@@ -11,35 +11,34 @@ namespace ServerTools.ServerCommands.Tests
     {
         static CommandContainer _container;
         static string _queueNamePrefix;
+
+
+        static IConfiguration Configuration { get; set; }
+
+
         /// <summary>
         /// Execute once before the test-suite
         /// </summary>
         /// 
 
-        IConfiguration Configuration { get; set; }
-
-        public UnitTestsForServerCommands()
+        [ClassInitialize()]
+        public static void InitTestSuite(TestContext testContext)
         {
             var builder = new ConfigurationBuilder()
                 .AddUserSecrets<UnitTestsForServerCommands>(true)
                 .AddJsonFile("local.tests.settings.json", true);
 
             Configuration = builder.Build();
-        }
 
-
-        [ClassInitialize()]
-        public static void InitTestSuite(TestContext testContext)
-        {
             _container = new CommandContainer();
             _queueNamePrefix = nameof(UnitTestsForServerCommands).ToLower();
-            //_ = new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), null, QueueNamePrefix: _queueNamePrefix);
+            _ = new Commands(_container, Configuration["StorageAccountName"], Configuration["StorageAccountKey"], null, QueueNamePrefix: _queueNamePrefix);
         }
 
         [ClassCleanup()]
         public static void CleanTestSuite()
         {
-           //new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), null, QueueNamePrefix: _queueNamePrefix).Clear();
+            new Commands(_container, Configuration["StorageAccountName"], Configuration["StorageAccountKey"], null, QueueNamePrefix: _queueNamePrefix).Clear();
         }
 
 
@@ -136,8 +135,6 @@ namespace ServerTools.ServerCommands.Tests
 
             //this should not fail as it has a valid storage account key: a string64 encoded
             Validators.ValidateNameForAzureStorageAccountKey("/jTXyUjLpws9kUjoxWc1WT68L06FwhfvkLHdKqWfM7SxViWlcLAElo1qOCpNieyjtUkS6u8+");
-
-            new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), null, QueueNamePrefix: _queueNamePrefix).Clear();
         }
 
 
