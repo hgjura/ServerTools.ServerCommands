@@ -63,19 +63,14 @@ jobs:
       with:
         repository: ${{ github.repository }}
 
-    - name: Increase patch number
-      run: |
-          version=${{ steps.latest-release.outputs.release }}
-          IFS=. read -r a b c<<<"$version"
-          echo "$a.$b.$((c+1))"
-
     - name: Pack CI
       if: github.event_name != 'release'
       run: |
           VER=${{ steps.latest-release.outputs.release }}
           VER="${VER//v}"
-          echo Next version $VER-${GITHUB_RUN_ID}
-          dotnet pack --configuration Release /p:Version=$VER-${GITHUB_RUN_ID} --no-build --output .
+          IFS=. read -r a b c<<<"$VER"
+          echo Next version $a.$b.$((c+1))${GITHUB_RUN_ID}
+          dotnet pack --configuration Release /p:Version=$a.$b.$((c+1))${GITHUB_RUN_ID} --no-build --output .
 
     - name: Pack Release
       if: github.event_name == 'release'
