@@ -62,12 +62,11 @@ jobs:
       with:
         repository: ${{ github.repository }}
 
-    - name: Get latest release
-      run: echo Last release ${{ steps.latest-release.outputs.release }}
-
     - name: Pack CI
       if: github.event_name != 'release'
-      run: dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
+      run: |
+          echo Last release ${{ steps.latest-release.outputs.release }//v}
+          dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
 
     - name: Pack Release
       if: github.event_name == 'release'
@@ -80,9 +79,9 @@ jobs:
           dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
   
     - name: Publish to GitHub PM
-      run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
+      #run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
 
     - name: Publish to Nuget PM
       if: github.event_name == 'release'
-      run: dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY}
+      #run: dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY}
 
