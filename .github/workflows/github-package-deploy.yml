@@ -58,9 +58,9 @@ jobs:
       working-directory: ./
 
     - id: latest-release
-        uses: pozetroninc/github-action-get-latest-release@master
-        with:
-          repository: ${{ github.repository }}
+      uses: pozetroninc/github-action-get-latest-release@master
+      with:
+        repository: ${{ github.repository }}
 
     -name: Get latest release
      run: |
