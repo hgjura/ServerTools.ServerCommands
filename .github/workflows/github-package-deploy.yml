@@ -65,7 +65,10 @@ jobs:
     - name: Pack CI
       if: github.event_name != 'release'
       run: |
-          echo Last release ${{ steps.latest-release.outputs.release }//v}
+          echo Last release ${{ steps.latest-release.outputs.release }}
+          VER=${{ steps.latest-release.outputs.release }}
+          VER="${VER//v}"
+          echo Next version VER
           dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
 
     - name: Pack Release
