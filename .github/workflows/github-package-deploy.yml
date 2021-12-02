@@ -46,16 +46,16 @@ jobs:
         dotnet build --no-restore --configuration Release
       working-directory: ./src/${{ env.PROJECT_NAME }}/
     
-    - name: Set secrets for tests 
-      run: |
-        dotnet user-secrets set "StorageAccountName" ${{ secrets.ACCT_NAME }}
-        dotnet user-secrets set "StorageAccountKey" ${{ secrets.ACCT_KEY }}
-      working-directory: ./tests/ServerTools.ServerCommands.Tests/
+    # - name: Set secrets for tests 
+    #   run: |
+    #     dotnet user-secrets set "StorageAccountName" ${{ secrets.ACCT_NAME }}
+    #     dotnet user-secrets set "StorageAccountKey" ${{ secrets.ACCT_KEY }}
+    #   working-directory: ./tests/ServerTools.ServerCommands.Tests/
 
-    - name: Test
-      run: |
-        dotnet test --verbosity minimal --configuration Release
-      working-directory: ./
+    # - name: Test
+    #   run: |
+    #     dotnet test --verbosity minimal --configuration Release
+    #   working-directory: ./
 
     - id: latest-release
       uses: pozetroninc/github-action-get-latest-release@master
@@ -68,7 +68,7 @@ jobs:
           echo Last release ${{ steps.latest-release.outputs.release }}
           VER=${{ steps.latest-release.outputs.release }}
           VER="${VER//v}"
-          echo Next version VER
+          echo Next version $VER-${GITHUB_RUN_ID}
           dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
 
     - name: Pack Release
