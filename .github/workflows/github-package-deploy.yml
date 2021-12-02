@@ -63,6 +63,12 @@ jobs:
       with:
         repository: ${{ github.repository }}
 
+    - name: Increase patch number
+      run: |
+          version=${{ steps.latest-release.outputs.release }}
+          IFS=. read -r a b c<<<"$version"
+          echo "$a.$b.$((c+1))"
+
     - name: Pack CI
       if: github.event_name != 'release'
       run: |
