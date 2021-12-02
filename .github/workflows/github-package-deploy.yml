@@ -70,8 +70,8 @@ jobs:
           VER="${VER//v}"
           IFS=. read -r a b c<<<"$VER"
           VER = "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
-          echo Next version "$VER"
-          dotnet pack --configuration Release /p:Version=$VER --no-build --output .
+          echo Next version $VER
+          #dotnet pack --configuration Release /p:Version=$VER --no-build --output .
 
     - name: Pack Release
       if: github.event_name == 'release'
@@ -81,12 +81,12 @@ jobs:
           echo Version: $VERSION
           VERSION="${VERSION//v}"
           echo Clean Version: $VERSION
-          dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
+          #dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
   
-    - name: Publish to GitHub PM
-      run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
+    # - name: Publish to GitHub PM
+    #   run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
 
-    - name: Publish to Nuget PM
-      if: github.event_name == 'release'
-      run: dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY}
+    # - name: Publish to Nuget PM
+    #   if: github.event_name == 'release'
+    #   run: dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY}
 
