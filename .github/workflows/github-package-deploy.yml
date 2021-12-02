@@ -46,18 +46,19 @@ jobs:
         dotnet build --no-restore --configuration Release
       working-directory: ./src/${{ env.PROJECT_NAME }}/
     
-    # - name: Set secrets for tests 
-    #   run: |
-    #     dotnet user-secrets set "StorageAccountName" ${{ secrets.ACCT_NAME }}
-    #     dotnet user-secrets set "StorageAccountKey" ${{ secrets.ACCT_KEY }}
-    #   working-directory: ./tests/ServerTools.ServerCommands.Tests/
+    - name: Set secrets for tests 
+      run: |
+        dotnet user-secrets set "StorageAccountName" ${{ secrets.ACCT_NAME }}
+        dotnet user-secrets set "StorageAccountKey" ${{ secrets.ACCT_KEY }}
+      working-directory: ./tests/ServerTools.ServerCommands.Tests/
 
-    # - name: Test
-    #   run: |
-    #     dotnet test --verbosity minimal --configuration Release
-    #   working-directory: ./
+    - name: Test
+      run: |
+        dotnet test --verbosity minimal --configuration Release
+      working-directory: ./
 
-    - id: latest-release
+    - name: Get Last Release Id
+      id: latest-release
       uses: pozetroninc/github-action-get-latest-release@master
       with:
         repository: ${{ github.repository }}
@@ -65,11 +66,10 @@ jobs:
     - name: Pack CI
       if: github.event_name != 'release'
       run: |
-          echo Last release ${{ steps.latest-release.outputs.release }}
           VER=${{ steps.latest-release.outputs.release }}
           VER="${VER//v}"
           echo Next version $VER-${GITHUB_RUN_ID}
-          dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
+          dotnet pack --configuration Release /p:Version=$VER-${GITHUB_RUN_ID} --no-build --output .
 
     - name: Pack Release
       if: github.event_name == 'release'
@@ -81,10 +81,10 @@ jobs:
           echo Clean Version: $VERSION
           dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
   
-    #- name: Publish to GitHub PM
-      #run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
+    - name: Publish to GitHub PM
+      run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
 
-    #- name: Publish to Nuget PM
-      #if: github.event_name == 'release'
-      #run: dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY}
+    - name: Publish to Nuget PM
+      if: github.event_name == 'release'
+      run: dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY}
 
