@@ -63,8 +63,7 @@ jobs:
         repository: ${{ github.repository }}
 
     -name: Get latest release
-     run: |
-        echo ${{ steps.keydb.outputs.release }}
+     run: echo Last release ${steps.latest-release.outputs.release}
 
     - name: Pack CI
       if: github.event_name != 'release'
