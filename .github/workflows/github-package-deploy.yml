@@ -68,9 +68,9 @@ jobs:
       run: |
           VER=${{ steps.latest-release.outputs.release }}
           VER="${VER//v}"
-          IFS=. read -r a b c<<< $VER
-          VER = "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
-          echo Next version $VER
+          IFS=. read -r a b c <<< "$VER"
+          echo "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
+      #   echo Next version $VER
       #   dotnet pack --configuration Release /p:Version=$VER --no-build --output .
 
     - name: Pack Release
