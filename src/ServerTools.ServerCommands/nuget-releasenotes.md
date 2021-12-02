@@ -1,8 +1,6 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-
 ## [1.0.0] - 2021/12/01
 ### Added
 - Validation of parameters when creating Commands
@@ -10,7 +8,6 @@ All notable changes to this project will be documented in this file.
 
 
 
-  
   
   
 
