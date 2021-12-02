@@ -57,6 +57,15 @@ jobs:
         dotnet test --verbosity minimal --configuration Release
       working-directory: ./
 
+    - id: latest-release
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ${{ github.repository }}
+
+    -name: Get latest release
+     run: |
+        echo ${{ steps.keydb.outputs.release }}
+
     - name: Pack CI
       if: github.event_name != 'release'
       run: dotnet pack --configuration Release /p:Version=${GITHUB_RUN_ID} --no-build --output .
