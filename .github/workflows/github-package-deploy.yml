@@ -62,8 +62,8 @@ jobs:
       with:
         repository: ${{ github.repository }}
 
-    -name: Get latest release
-     run: echo Last release 
+    - name: Get latest release
+      run: echo Last release 
 
     - name: Pack CI
       if: github.event_name != 'release'
