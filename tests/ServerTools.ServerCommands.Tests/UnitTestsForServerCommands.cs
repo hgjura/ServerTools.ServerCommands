@@ -137,8 +137,5 @@ namespace ServerTools.ServerCommands.Tests
             Validators.ValidateNameForAzureStorageAccountKey("/jTXyUjLpws9kUjoxWc1WT68L06FwhfvkLHdKqWfM7SxViWlcLAElo1qOCpNieyjtUkS6u8+");
         }
 
-
-
-
     }
 }

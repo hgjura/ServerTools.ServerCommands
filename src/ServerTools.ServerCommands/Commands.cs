@@ -63,6 +63,16 @@ namespace ServerTools.ServerCommands
         #region Single Commands functionality
         public async Task<bool> PostCommand<T>(dynamic CommandContext)
         {
+            return await PostCommand(typeof(T).Name, CommandContext);
+        }
+
+        public async Task<bool> PostCommand(Type type, dynamic CommandContext)
+        {
+            return await PostCommand(type.Name, CommandContext);
+        }
+
+        public async Task<bool> PostCommand(string type_name, dynamic CommandContext)
+        {
             var commandBody = new ExpandoObject() as dynamic;
             commandBody.Metadata = new ExpandoObject() as dynamic;
             commandBody.CommandContext = new ExpandoObject() as dynamic;
@@ -70,7 +80,7 @@ namespace ServerTools.ServerCommands
             commandBody.CommandContext = CommandContext;
 
             commandBody.Metadata.UniqueId = Guid.NewGuid();
-            commandBody.Metadata.CommandType = typeof(T).Name;
+            commandBody.Metadata.CommandType = type_name;
             commandBody.Metadata.CommandPostedOn = DateTime.UtcNow;
 
 
@@ -78,8 +88,6 @@ namespace ServerTools.ServerCommands
 
             return r != null ? true : false;
         }
-
-        
 
         public async Task<(bool, int, List<string>)> ExecuteCommands(int timeWindowinMinues = 1)
         {
@@ -127,20 +135,32 @@ namespace ServerTools.ServerCommands
             return result;
         }
 
-       
+
 
         #endregion
 
         #region Queue Commands functionality
 
-
         public void AddToQueue<T>(dynamic CommandContext)
+        {
+            AddToQueue(typeof(T).Name, CommandContext);
+        }
+
+        public void AddToQueue(Type type, dynamic CommandContext)
+        {
+            AddToQueue(type.Name, CommandContext);
+        }
+
+        public void AddToQueue<T>(string type_name, dynamic CommandContext)
         { 
             var commandBody = new ExpandoObject() as dynamic;
             commandBody.Metadata = new ExpandoObject() as dynamic;
             commandBody.CommandContext = new ExpandoObject() as dynamic;
 
             commandBody.CommandContext = CommandContext;
+
+            commandBody.Metadata.UniqueId = Guid.NewGuid();
+            commandBody.Metadata.CommandType = type_name;
 
             queue.Enqueue(commandBody);
         }
@@ -163,7 +183,7 @@ namespace ServerTools.ServerCommands
                 command.Metadata.OrderId = queueorder;
                 command.Metadata.IsLast = queue.Count == 0;
 
-                command.Metadata.PostedOn = DateTime.UtcNow;
+                command.Metadata.CommandPostedOn = DateTime.UtcNow;
 
                 var r = await qsc_requests.SendMessageAsync(JsonConvert.SerializeObject(command));
             }

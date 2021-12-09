@@ -1,6 +1,5 @@
 <h1 align="center">
   <a href="https://github.com/hgjura/ServerTools.ServerCommands">
-    <!-- Please provide path to your logo here -->
     <img src=".github/logo.png" alt="Logo" width="650" height="150">
   </a>
 </h1>

@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - not yet
+### Added
+- Overloads for PostCommand() and PostResponse(), accepting Type and Type name
+### Fixed 
+- Issue with batch posting cused by inproper setting of type name
+
+
+
 ## [1.0.0] - 2021/12/01
 ### Added
 - Validation of parameters when creating Commands

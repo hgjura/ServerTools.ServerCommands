@@ -31,9 +31,16 @@ namespace ServerTools.ServerCommands
 
             return this;
         }
-        public CommandContainer RegisterCommand<T>(Type[] const_types, bool IsSingleton = true) where T : IRemoteCommand
+        public CommandContainer RegisterCommand<T>(Type[] constructor_types, bool IsSingleton = true) where T : IRemoteCommand
         {
-            c.Register<IRemoteCommand>(reuse: IsSingleton ? Reuse.Singleton : Reuse.Transient, made: Made.Of(typeof(T).GetConstructor(const_types)), serviceKey: typeof(T).Name);
+            c.Register<IRemoteCommand>(reuse: IsSingleton ? Reuse.Singleton : Reuse.Transient, made: Made.Of(typeof(T).GetConstructor(constructor_types)), serviceKey: typeof(T).Name);
+
+            return this;
+        }
+
+        public CommandContainer RegisterCommand(Type command_type) 
+        {
+            c.Register<IRemoteCommand>(serviceKey: command_type.Name);
 
             return this;
         }
@@ -48,6 +55,10 @@ namespace ServerTools.ServerCommands
             return c.IsRegistered<IRemoteCommand>(serviceKey: ServiceKey);
         }
 
+        public bool IsCommandRegistered(Type type)
+        {
+            return c.IsRegistered<IRemoteCommand>(serviceKey: type.Name);
+        }
 
         public IRemoteCommand ResolveCommand<T>() where T : IRemoteCommand
         {
@@ -88,7 +99,12 @@ namespace ServerTools.ServerCommands
 
             return this;
         }
+        public CommandContainer RegisterResponse(Type response_type)
+        {
+            c.Register<IRemoteResponse>(serviceKey: response_type.Name);
 
+            return this;
+        }
         public bool IsResponseRegistered<TCommand, TResponse>() where TCommand : IRemoteCommand where TResponse : IRemoteResponse
         {
             return c.IsRegistered<IRemoteResponse>(serviceKey: typeof(TResponse).Name) && commandresponsetypemap.ContainsKey(typeof(TCommand));
@@ -98,7 +114,10 @@ namespace ServerTools.ServerCommands
         {
             return c.IsRegistered<IRemoteResponse>(serviceKey: ServiceKey) && commandresponsetypemap.ContainsValue(ResolveResponse(ServiceKey).GetType());  
         }
-
+        public bool IsResponseRegistered(Type type)
+        {
+            return c.IsRegistered<IRemoteResponse>(serviceKey: type.Name);
+        }
 
         public IRemoteResponse ResolveResponse<TResponse>() where TResponse : IRemoteResponse
         {

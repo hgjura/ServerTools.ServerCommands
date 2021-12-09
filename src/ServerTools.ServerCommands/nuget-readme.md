@@ -11,13 +11,12 @@ More documentation is available at the [ServerCommands](https://github.com/hgjur
 
 To post a command:
 ```csharp
-var _container = new CommandContainer();
 
-_container.RegisterCommand<AddNumbersCommand>();
-
-var c = new Commands(_container, Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"));
+var c = new Commands(new CommandContainer(), Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"));
 
 _ = await c.PostCommand<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
+//or _ = await c.PostCommand(typeof(AddNumbersCommand), new { Number1 = 2, Number2 = 3 });
+
 ```
 
 To execute commands:
