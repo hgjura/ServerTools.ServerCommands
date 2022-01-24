@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <PackageId>ServerTools.ServerCommands</PackageId>
-    <Version>0.0.1</Version>
     <Authors>Herald Gjura</Authors>
     <Company>ServerTools</Company>
     <Copyright>Copyright 2021 (c) Herald Gjura. All rights reserved.</Copyright>

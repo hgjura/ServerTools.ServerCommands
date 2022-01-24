@@ -267,7 +267,11 @@ namespace ServerTools.ServerCommands
             commandDDLBody.PostedToDeadletterQueueOn = DateTime.UtcNow;
 
             var r = await qsc_requests_deadletter.SendMessageAsync(JsonConvert.SerializeObject(commandDDLBody));
-            
+
+            //qsc_requests_deadletter.SetMetadataAsync("", "");
+
+
+
             return r != null;
         }
 
