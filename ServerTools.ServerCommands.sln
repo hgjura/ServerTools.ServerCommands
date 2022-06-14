@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerTools.ServerCommands"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerTools.ServerCommands.Tests", "tests\ServerTools.ServerCommands.Tests\ServerTools.ServerCommands.Tests.csproj", "{7F0AB519-5416-432B-9BBD-16DED8C1CA90}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerTools.ServerCommands.AzureServiceBus", "src\ServerTools.ServerCommands.AzureServiceBus\ServerTools.ServerCommands.AzureServiceBus.csproj", "{F62818CF-C94D-4662-8025-04ACFF70B033}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerTools.ServerCommands.AzureStorageQueues", "src\ServerTools.ServerCommands.AzureStorageQueues\ServerTools.ServerCommands.AzureStorageQueues.csproj", "{993E0BC8-7588-4611-A87E-269CA809E2F8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{7F0AB519-5416-432B-9BBD-16DED8C1CA90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F0AB519-5416-432B-9BBD-16DED8C1CA90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F0AB519-5416-432B-9BBD-16DED8C1CA90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F62818CF-C94D-4662-8025-04ACFF70B033}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F62818CF-C94D-4662-8025-04ACFF70B033}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F62818CF-C94D-4662-8025-04ACFF70B033}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F62818CF-C94D-4662-8025-04ACFF70B033}.Release|Any CPU.Build.0 = Release|Any CPU
+		{993E0BC8-7588-4611-A87E-269CA809E2F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{993E0BC8-7588-4611-A87E-269CA809E2F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{993E0BC8-7588-4611-A87E-269CA809E2F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{993E0BC8-7588-4611-A87E-269CA809E2F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

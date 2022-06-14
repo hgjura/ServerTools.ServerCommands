@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ServerTools.ServerCommands
@@ -20,8 +18,11 @@ namespace ServerTools.ServerCommands
         /// <item>
         /// <description>Item2. The excpetion object, in the case when Item1 is false, otherwise null.</description>
         /// </item>
+        /// <item>
+        /// <description>Item3. The metadata object.</description>
+        /// </item>
         /// </list>
         /// </returns>
-        public Task<(bool, Exception)> ExecuteAsync(dynamic response, dynamic metadata);
+        public Task<(bool, Exception, CommandMetadata)> ExecuteAsync(dynamic response, CommandMetadata metadata);
     }
 }

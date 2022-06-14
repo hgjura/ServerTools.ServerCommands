@@ -30,9 +30,7 @@ namespace ServerTools.ServerCommands
 
         public Commands(CommandContainer Container, string AccountName, string AccountKey, ILogger Log = null, Policy RetryPolicy = null, string QueueNamePrefix = null)
         {
-            _Initialize(Container, AccountName, AccountKey, Log, RetryPolicy, QueueNamePrefix);
-
-            
+            _Initialize(Container, AccountName, AccountKey, Log, RetryPolicy, QueueNamePrefix);          
 
         }
 
@@ -164,8 +162,8 @@ namespace ServerTools.ServerCommands
 
             queue.Enqueue(commandBody);
         }
-       
-           
+
+
         public async Task FlushQueueAsync()
         {
             Guid correlationId = Guid.NewGuid();
@@ -192,7 +190,7 @@ namespace ServerTools.ServerCommands
 
         #endregion
 
-       
+
 
         private async Task<(bool, Exception, dynamic, dynamic)> _ProcessCommands(string commandBody, ILogger log)
         {

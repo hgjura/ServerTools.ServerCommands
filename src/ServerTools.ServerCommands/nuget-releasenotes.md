@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Overloads for PostCommand() and PostResponse(), accepting Type and Type name
 ### Fixed 
-- Issue with batch posting cused by inproper setting of type name
+- Issue with batch posting caused by inproper setting of type name
 
 
 

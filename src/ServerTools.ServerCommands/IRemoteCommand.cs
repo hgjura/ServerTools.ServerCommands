@@ -24,18 +24,19 @@ namespace ServerTools.ServerCommands
         /// <returns>A tupple response 32-bit positive integer, representing the sum of the two specified numbers.
         /// <list type="bullet">
         /// <item>
-        /// <description>Item1. A bool that inidcates if the remote Response executed succesfully or not.</description>
+        /// <description>Item1. A bool that inidcates if the remote Command executed succesfully or not.</description>
         /// </item>
         /// <item>
-        /// <description>Item2. The excpetion object, in the case when Item1 is false, otherwise null.</description>
+        /// <description>Item2. The exception object, in the case when Item1 is false, otherwise null.</description>
         /// <item>
         /// <description>Item3. In the case when <c>RequiresResponse</c> property is set to true, this will hold the body of the response, otherwise null. <see cref="IRemoteResponse.ExecuteAsync(dynamic, dynamic)"/>.</description>
         /// <item>
-        /// <description>Item3. In the case when <c>RequiresResponse</c> property is set to true, this will hold the metadata of the response, otherwise null. <see cref="IRemoteResponse.ExecuteAsync(dynamic, dynamic)"/>. Generally this is the metadata of the original command with added poperties during Response creation and execution.</description>
+        /// <description>Item4. In the case when <c>RequiresResponse</c> property is set to true, this will hold the metadata of the response, otherwise null. <see cref="IRemoteResponse.ExecuteAsync(dynamic, dynamic)"/>. Generally this is the metadata of the original command with added poperties during Response creation and execution.</description>
         /// </item>
         /// </list>
         /// </returns>
-        public Task<(bool, Exception, dynamic, dynamic)> ExecuteAsync(dynamic command, dynamic metadata);
+        //public Task<(bool, Exception, dynamic, CommandMetadata)> ExecuteAsync(dynamic command, CommandMetadata metadata); 
+        public Task<(bool, Exception, dynamic, CommandMetadata)> ExecuteAsync(dynamic command, CommandMetadata metadata);
         public bool RequiresResponse { get; }
     }
 }

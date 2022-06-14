@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\ServerTools.ServerCommands.AzureStorageQueues\ServerTools.ServerCommands.AzureStorageQueues.csproj" />
     <ProjectReference Include="..\..\src\ServerTools.ServerCommands\ServerTools.ServerCommands.csproj" />
   </ItemGroup>
 

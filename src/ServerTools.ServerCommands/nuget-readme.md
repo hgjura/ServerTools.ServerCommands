@@ -14,8 +14,8 @@ To post a command:
 
 var c = new Commands(new CommandContainer(), Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"));
 
-_ = await c.PostCommand<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
-//or _ = await c.PostCommand(typeof(AddNumbersCommand), new { Number1 = 2, Number2 = 3 });
+_ = await c.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
+//or _ = await c.PostCommandAsync(typeof(AddNumbersCommand), new { Number1 = 2, Number2 = 3 });
 
 ```
 
