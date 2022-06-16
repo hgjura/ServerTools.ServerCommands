@@ -37,7 +37,7 @@ namespace ServerTools.ServerCommands.Tests
 
             _container = new CommandContainer();
             _queueNamePrefix = nameof(UnitTestsForServerCommands).ToLower();
-            commands = await new CloudCommands().InitializeAsync(_container, new AzureStorageQueuesConnectionOptions(Configuration["StorageAccountName"], Configuration["StorageAccountKey"], 3, logger, QueueNamePrefix: _queueNamePrefix));
+            //commands = await new CloudCommands().InitializeAsync(_container, new AzureStorageQueuesConnectionOptions(Configuration["StorageAccountName"], Configuration["StorageAccountKey"], 3, logger, QueueNamePrefix: _queueNamePrefix));
         }
 
         [ClassCleanup()]
