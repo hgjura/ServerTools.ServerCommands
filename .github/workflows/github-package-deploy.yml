@@ -43,9 +43,9 @@ jobs:
       run: dotnet restore
       working-directory: ./
 
-    - name: Restore dependencies
-      run: dotnet restore
-      working-directory: ./src/${{ env.PROJECT_NAME_ASQ }}/
+    # - name: Restore dependencies
+    #   run: dotnet restore
+    #   working-directory: ./src/${{ env.PROJECT_NAME_ASQ }}/
     
     - name: Build Azure Storage Queues
       run: |
@@ -73,7 +73,7 @@ jobs:
       uses: pozetroninc/github-action-get-latest-release@master
       with:
         repository: ${{ github.repository }}
-
+    
     - name: Pack CI Core
       if: github.event_name != 'release'
       run: |
