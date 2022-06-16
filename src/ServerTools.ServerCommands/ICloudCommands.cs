@@ -30,5 +30,7 @@ namespace ServerTools.ServerCommands
         #endregion
 
         public Task ClearAllAsync();
+
+        public Task<BaseCloudCommands> InitializeAsync(CommandContainer Container, ConnectionOptions ConnectionOptions);
     }
 }

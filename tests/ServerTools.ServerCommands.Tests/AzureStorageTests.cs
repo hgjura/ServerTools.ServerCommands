@@ -48,7 +48,7 @@ namespace ServerTools.ServerCommands.Tests
 
 
         [TestMethod]
-        public void A1000_TestValidateSecretsAreNotNull()
+        public void I1000_TestIntegrationWithAzureStorageQueues()
         {
             _container
                 .Use(logger)
@@ -57,9 +57,9 @@ namespace ServerTools.ServerCommands.Tests
 
             //_ = commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 }).GetAwaiter().GetResult();
 
-            var result1 = commands.ExecuteCommandsAsync().GetAwaiter().GetResult();
+            //var result1 = commands.ExecuteCommandsAsync().GetAwaiter().GetResult();
 
-            var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
+            //var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
 
         }
 
