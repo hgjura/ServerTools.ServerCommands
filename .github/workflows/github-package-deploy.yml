@@ -74,73 +74,73 @@ jobs:
       with:
         repository: ${{ github.repository }}
     
-    - name: Pack CI Core
-      if: github.event_name != 'release'
-      run: |
-          VER=${{ steps.latest-release.outputs.release }}
-          VER="${VER//v}"
-          IFS=. read -r a b c <<< "$VER"
-          echo Next Version: "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
-          dotnet pack --configuration Release /p:Version="$a.$b.$((c+1))"-${GITHUB_RUN_ID} --no-build --output .
-      working-directory: ./src/${{ env.PROJECT_NAME_CORE }}/
+    # - name: Pack CI Core
+    #   if: github.event_name != 'release'
+    #   run: |
+    #       VER=${{ steps.latest-release.outputs.release }}
+    #       VER="${VER//v}"
+    #       IFS=. read -r a b c <<< "$VER"
+    #       echo Next Version: "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
+    #       dotnet pack --configuration Release /p:Version="$a.$b.$((c+1))"-${GITHUB_RUN_ID} --no-build --output .
+    #   working-directory: ./src/${{ env.PROJECT_NAME_CORE }}/
 
-      - name: Pack CI ASQ
-      if: github.event_name != 'release'
-      run: |
-          VER=${{ steps.latest-release.outputs.release }}
-          VER="${VER//v}"
-          IFS=. read -r a b c <<< "$VER"
-          echo Next Version: "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
-          dotnet pack --configuration Release /p:Version="$a.$b.$((c+1))"-${GITHUB_RUN_ID} --no-build --output .
-      working-directory: ./src/${{ env.PROJECT_NAME_ASQ }}/
+    #   - name: Pack CI ASQ
+    #   if: github.event_name != 'release'
+    #   run: |
+    #       VER=${{ steps.latest-release.outputs.release }}
+    #       VER="${VER//v}"
+    #       IFS=. read -r a b c <<< "$VER"
+    #       echo Next Version: "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
+    #       dotnet pack --configuration Release /p:Version="$a.$b.$((c+1))"-${GITHUB_RUN_ID} --no-build --output .
+    #   working-directory: ./src/${{ env.PROJECT_NAME_ASQ }}/
 
-      - name: Pack CI ASB
-      if: github.event_name != 'release'
-      run: |
-          VER=${{ steps.latest-release.outputs.release }}
-          VER="${VER//v}"
-          IFS=. read -r a b c <<< "$VER"
-          echo Next Version: "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
-          dotnet pack --configuration Release /p:Version="$a.$b.$((c+1))"-${GITHUB_RUN_ID} --no-build --output .
-      working-directory: ./src/${{ env.PROJECT_NAME_ASB }}/
+    #   - name: Pack CI ASB
+    #   if: github.event_name != 'release'
+    #   run: |
+    #       VER=${{ steps.latest-release.outputs.release }}
+    #       VER="${VER//v}"
+    #       IFS=. read -r a b c <<< "$VER"
+    #       echo Next Version: "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
+    #       dotnet pack --configuration Release /p:Version="$a.$b.$((c+1))"-${GITHUB_RUN_ID} --no-build --output .
+    #   working-directory: ./src/${{ env.PROJECT_NAME_ASB }}/
 
-    - name: Pack Release - Core
-      if: github.event_name == 'release'
-      run: |
-          arrTag=(${GITHUB_REF//\// })
-          VERSION="${arrTag[2]}"
-          echo Version: $VERSION
-          VERSION="${VERSION//v}"
-          echo Clean Version: $VERSION
-          dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
-      working-directory: ./src/${{ env.PROJECT_NAME_CORE }}/
+    # - name: Pack Release - Core
+    #   if: github.event_name == 'release'
+    #   run: |
+    #       arrTag=(${GITHUB_REF//\// })
+    #       VERSION="${arrTag[2]}"
+    #       echo Version: $VERSION
+    #       VERSION="${VERSION//v}"
+    #       echo Clean Version: $VERSION
+    #       dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
+    #   working-directory: ./src/${{ env.PROJECT_NAME_CORE }}/
 
-    - name: Pack Release - ASQ
-      if: github.event_name == 'release'
-      run: |
-          arrTag=(${GITHUB_REF//\// })
-          VERSION="${arrTag[2]}"
-          echo Version: $VERSION
-          VERSION="${VERSION//v}"
-          echo Clean Version: $VERSION
-          dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
-      working-directory: ./src/${{ env.PROJECT_NAME_ASQ }}/
+    # - name: Pack Release - ASQ
+    #   if: github.event_name == 'release'
+    #   run: |
+    #       arrTag=(${GITHUB_REF//\// })
+    #       VERSION="${arrTag[2]}"
+    #       echo Version: $VERSION
+    #       VERSION="${VERSION//v}"
+    #       echo Clean Version: $VERSION
+    #       dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
+    #   working-directory: ./src/${{ env.PROJECT_NAME_ASQ }}/
 
-    - name: Pack Release - ASB
-      if: github.event_name == 'release'
-      run: |
-          arrTag=(${GITHUB_REF//\// })
-          VERSION="${arrTag[2]}"
-          echo Version: $VERSION
-          VERSION="${VERSION//v}"
-          echo Clean Version: $VERSION
-          dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
-      working-directory: ./src/${{ env.PROJECT_NAME_ASB }}/
+    # - name: Pack Release - ASB
+    #   if: github.event_name == 'release'
+    #   run: |
+    #       arrTag=(${GITHUB_REF//\// })
+    #       VERSION="${arrTag[2]}"
+    #       echo Version: $VERSION
+    #       VERSION="${VERSION//v}"
+    #       echo Clean Version: $VERSION
+    #       dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
+    #   working-directory: ./src/${{ env.PROJECT_NAME_ASB }}/
   
-    - name: Publish to GitHub PM
-      run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
+    # - name: Publish to GitHub PM
+    #   run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN}
 
-    - name: Publish to Nuget PM
-      if: github.event_name == 'release'
-      run: dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY}
+    # - name: Publish to Nuget PM
+    #   if: github.event_name == 'release'
+    #   run: dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY}
 
