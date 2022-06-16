@@ -41,13 +41,17 @@ jobs:
      
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: ./
+
+    - name: Restore dependencies
+      run: dotnet restore
       working-directory: ./src/${{ env.PROJECT_NAME_ASQ }}/
     
     - name: Build Azure Storage Queues
       run: |
         dotnet build --no-restore --configuration Release
       working-directory: ./src/${{ env.PROJECT_NAME_ASQ }}/
-      
+
     - name: Build Azure ServiceBus
       run: |
         dotnet build --no-restore --configuration Release
