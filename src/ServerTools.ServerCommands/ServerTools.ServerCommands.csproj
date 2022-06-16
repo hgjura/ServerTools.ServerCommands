@@ -19,14 +19,10 @@
     <PackageReleaseNotes>Some release notes</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Commands.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="nuget_logo_120-120.png" Pack="true" PackagePath="" />
     <None Include="nuget-readme.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Queues" Version="12.8.0" />
     <PackageReference Include="DryIoc.dll" Version="4.8.4" />
     <PackageReference Include="FluentAssertions" Version="6.2.0" />
     <PackageReference Include="FluentAssertions.Analyzers" Version="0.13.0" />
