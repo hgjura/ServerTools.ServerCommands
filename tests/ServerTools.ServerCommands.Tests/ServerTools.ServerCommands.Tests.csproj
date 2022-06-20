@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <UserSecretsId>ServerTools.ServerCommands.Tests - 24170c4b-0f9c-4ef5-9a70-cc3d7d00041c</UserSecretsId>
   </PropertyGroup>

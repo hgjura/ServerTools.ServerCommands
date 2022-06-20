@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using FastExpressionCompiler.LightExpression;
+using Microsoft.Azure.Amqp.Encoding;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -37,7 +39,7 @@ namespace ServerTools.ServerCommands.Tests
 
             _container = new CommandContainer();
             _queueNamePrefix = nameof(UnitTestsForServerCommands).ToLower();
-            //commands = await new CloudCommands().InitializeAsync(_container, new AzureStorageQueuesConnectionOptions(Configuration["StorageAccountName"], Configuration["StorageAccountKey"], 3, logger, QueueNamePrefix: _queueNamePrefix));
+            commands = await new CloudCommands().InitializeAsync(_container, new AzureStorageQueuesConnectionOptions(Configuration["StorageAccountName"], Configuration["StorageAccountKey"], 3, logger, QueueNamePrefix: _queueNamePrefix));
         }
 
         [ClassCleanup()]
@@ -61,8 +63,15 @@ namespace ServerTools.ServerCommands.Tests
 
             //var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
 
+            var dlq = commands.HandleCommandsDlqAsync(HandleDlqMessage).GetAwaiter().GetResult();
+
         }
 
+
+        public bool HandleDlqMessage(Message m)
+        {
+            return m.DlqDequeueCount >= 2 ? false : true;
+        }
        
 
     }
@@ -83,7 +92,7 @@ namespace ServerTools.ServerCommands.Tests
 
             try
             {
-                //throw new Exception("TEST EXCEPTION 2 ");
+                throw new Exception("TEST EXCEPTION COMMAND");
                 int n1 = (int)command.Number1;
                 int n2 = (int)command.Number2;
 

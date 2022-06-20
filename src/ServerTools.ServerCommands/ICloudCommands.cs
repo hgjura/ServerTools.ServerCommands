@@ -13,12 +13,11 @@ namespace ServerTools.ServerCommands
         public Task<bool> PostCommandAsync(Type type, dynamic CommandContext, CommandMetadata PreviousMatadata = new());
 
         public Task<bool> PostCommandAsync(string type_name, dynamic CommandContext, CommandMetadata PreviousMatadata = new());
+        public Task<bool> PostCommandAsync(Message message);
 
         public Task<(bool, int, List<string>)> ExecuteCommandsAsync(int timeWindowinMinutes = 1);
 
         #endregion
-
-        
 
         #region Single Response functionality
         public Task<bool> PostResponseAsync<T>(dynamic ResponseContext, CommandMetadata OriginalCommandMetadata);
@@ -29,6 +28,9 @@ namespace ServerTools.ServerCommands
 
         #endregion
 
+        public Task<(bool, int)> HandleCommandsDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1);
+        public Task<(bool, int)> HandleResponsesDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1);
+        
         public Task ClearAllAsync();
 
         public Task<BaseCloudCommands> InitializeAsync(CommandContainer Container, ConnectionOptions ConnectionOptions);

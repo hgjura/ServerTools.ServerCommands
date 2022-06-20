@@ -40,6 +40,7 @@ namespace ServerTools.ServerCommands
 
             return r;
         }
+
         public async Task<(bool, int, List<string>)> ExecuteCommandsAsync(int timeWindowinMinutes = 1)
         {
             //tupple return: Item1: (bool) - if all commands have been processed succesfully or not | Item2: (int) - number of commands that were processed/returned from the remote queue | Item3: (List<string>) - List of all exception messages when Item1 = false;
@@ -142,12 +143,48 @@ namespace ServerTools.ServerCommands
             }
         }
 
+        public async Task<(bool, int)> HandleCommandsDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1) 
+        {
+            var result = (true, 0);
 
+            while (true)
+            {
+                var messages = await GetCommandsFromDlqAsync(timeWindowinMinutes);
+
+                if (messages.Length == 0) break;
+
+                result.Item2 = messages.Length;
+
+                foreach (var m in messages)
+                {
+                    if (ValidateProcessing != null && !ValidateProcessing(m))
+                    {
+                        await DeleteCommandFromDlqAsync(m.OriginalMessage);
+                        connectionOptions.Log?.LogWarning($"DLQ: [{connectionOptions.CommandQueueName ?? "unknown"}] : message {m.Id} will not be processed and will be removed permanently.");
+                    }
+                    else
+                    {
+                        if (await PostCommandAsync(m))
+                        {
+                            await DeleteCommandFromDlqAsync(m.OriginalMessage);
+                        }
+                    }
+                }
+
+                var count = await GetCommandsDlqCountAsync();
+                connectionOptions.Log?.LogWarning($"DLQ: [{connectionOptions.CommandQueueName ?? "unknown"}] {count} messages left in queue.");
+            }
+
+            return result;
+        }
         public abstract Task<bool> PostCommandAsync(Message message);
         public abstract Task<bool> PostCommandToDlqAsync(Message message);
         public abstract Task<Message[]> GetCommandsAsync(int timeWindowinMinutes);
+        public abstract Task<Message[]> GetCommandsFromDlqAsync(int timeWindowinMinutes);
         public abstract Task DeleteCommandAsync(object message);
+        public abstract Task DeleteCommandFromDlqAsync(object message);
         public abstract Task<long> GetCommandsCountAsync();
+        public abstract Task<long> GetCommandsDlqCountAsync();
 
         #endregion
 
@@ -222,7 +259,7 @@ namespace ServerTools.ServerCommands
                     }
                 }
 
-                var count = await GetResponsessCountAsync();
+                var count = await GetResponsesCountAsync();
 
                 connectionOptions.Log?.LogWarning($"[{connectionOptions.ResponseQueueName ?? "unknown"}] {count} messages left in queue.");
             }
@@ -265,13 +302,50 @@ namespace ServerTools.ServerCommands
                 return (false, ex, metadata);
             }
         }
-       
+
+        public async Task<(bool, int)> HandleResponsesDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1)
+        {
+            var result = (true, 0);
+
+            while (true)
+            {
+                var messages = await GetResponsesFromDlqAsync(timeWindowinMinutes);
+
+                if (messages.Length == 0) break;
+
+                result.Item2 = messages.Length;
+
+                foreach (var m in messages)
+                {
+                    if (ValidateProcessing != null && !ValidateProcessing(m))
+                    {
+                        await DeleteResponseFromDlqAsync(m.OriginalMessage);
+                        connectionOptions.Log?.LogWarning($"DLQ: [{connectionOptions.ResponseQueueName ?? "unknown"}] : message {m.Id} will not be processed and will be removed permanenlty.");
+                    }
+                    else
+                    {
+                        if (await PostResponseAsync(m))
+                        {
+                            await DeleteResponseFromDlqAsync(m.OriginalMessage);
+                        }
+                    }
+                }
+
+                var count = await GetResponsesDlqCountAsync();
+                connectionOptions.Log?.LogWarning($"DLQ: [{connectionOptions.ResponseQueueName ?? "unknown"}] {count} messages left in queue.");
+            }
+
+            return result;
+        }
 
         public abstract Task<bool> PostResponseAsync(Message message);
         public abstract Task<bool> PostResponseToDlqAsync(Message message);
         public abstract Task<Message[]> GetResponsesAsync(int timeWindowinMinutes);
+        public abstract Task<Message[]> GetResponsesFromDlqAsync(int timeWindowinMinutes);
         public abstract Task DeleteResponseAsync(object message);
-        public abstract Task<long> GetResponsessCountAsync();
+        public abstract Task DeleteResponseFromDlqAsync(object message);
+        public abstract Task<long> GetResponsesCountAsync();
+        public abstract Task<long> GetResponsesDlqCountAsync();
         #endregion
 
 
