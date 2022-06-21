@@ -8,7 +8,7 @@ namespace ServerTools.ServerCommands.AzureServiceBus
         public string ConnectionString { get; }
         public string QueueNamePrefix { get; }
 
-        public AzureServiceBusConnectionOptions(string ConnectionString, int MaxDequeueCountForError = 5, ILogger Log = null, Policy RetryPolicy = null, string QueueNamePrefix = null) : base(Log, RetryPolicy, MaxDequeueCountForError)
+        public AzureServiceBusConnectionOptions(string ConnectionString, int MaxDequeueCountForError = 5, ILogger Log = null, AsyncPolicy RetryPolicy = null, string QueueNamePrefix = null) : base(Log, RetryPolicy, MaxDequeueCountForError)
         {
             this.ConnectionString = ConnectionString;
             this.QueueNamePrefix = QueueNamePrefix;

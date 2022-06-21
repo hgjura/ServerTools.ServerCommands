@@ -11,7 +11,7 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
 
         public readonly string QueueNamePrefix = null;
 
-        public AzureStorageQueuesConnectionOptions(string AccountName, string AccountKey, int MaxDequeueCountForError = 5, ILogger Log = null, Policy RetryPolicy = null, string QueueNamePrefix = null) : base(Log, RetryPolicy, MaxDequeueCountForError)
+        public AzureStorageQueuesConnectionOptions(string AccountName, string AccountKey, int MaxDequeueCountForError = 5, ILogger Log = null, AsyncPolicy RetryPolicy = null, string QueueNamePrefix = null) : base(Log, RetryPolicy, MaxDequeueCountForError)
         {
             AzureStorageQueuesValidators.ValidateNameForAzureStorage(AccountName);
             AzureStorageQueuesValidators.ValidateNameForAzureStorageAccountKey(AccountKey);

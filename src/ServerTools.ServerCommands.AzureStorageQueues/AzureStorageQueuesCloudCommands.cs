@@ -21,21 +21,24 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
 
         public override async Task ClearAllAsync()
         {
-            _ = await qsc_requests_deadletter.ClearMessagesAsync();
-            _ = await qsc_requests_deadletter.DeleteAsync();
+            await connectionOptions.RetryPolicy.ExecuteAsync(async () =>
+            {
+                _ = await qsc_requests_deadletter.ClearMessagesAsync();
+                _ = await qsc_requests_deadletter.DeleteAsync();
 
-            _ = await qsc_responses_deadletter.ClearMessagesAsync();
-            _ = await qsc_responses_deadletter.DeleteAsync();
+                _ = await qsc_responses_deadletter.ClearMessagesAsync();
+                _ = await qsc_responses_deadletter.DeleteAsync();
 
-            _ = await qsc_requests.ClearMessagesAsync();
-            _ = await qsc_requests.DeleteAsync();
+                _ = await qsc_requests.ClearMessagesAsync();
+                _ = await qsc_requests.DeleteAsync();
 
-            _ = await qsc_responses.ClearMessagesAsync();
-            _ = await qsc_responses.DeleteAsync();
+                _ = await qsc_responses.ClearMessagesAsync();
+                _ = await qsc_responses.DeleteAsync();
+            });
         }
         public async Task ClearAllAsync(bool WaitForQueuesToClear)
         {
-            await ClearAllAsync();
+            await connectionOptions.RetryPolicy.ExecuteAsync(async () => await ClearAllAsync());
 
             //this is needed since you cannot recreate a queue with same name for 30 seconds. Pausing for 35 seconds.
             if (WaitForQueuesToClear) Thread.Sleep(35000);
@@ -53,7 +56,7 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
 
         public override async Task<Message[]> GetCommandsAsync(int timeWindowinMinutes)
         {
-            QueueMessage[] messages = await qsc_requests.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes));
+            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_requests.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes)));
 
             List<Message> list = new List<Message>();
 
@@ -71,7 +74,7 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
 
         public override async Task<Message[]> GetCommandsFromDlqAsync(int timeWindowinMinutes)
         {
-            QueueMessage[] messages = await qsc_requests_deadletter.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes));
+            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_requests_deadletter.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes)));
 
             List<Message> list = new List<Message>();
 
@@ -99,7 +102,7 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
         {
             List<Message> list = new List<Message>();
 
-            QueueMessage[] messages = await qsc_responses.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes));
+            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_responses.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes)));
 
             foreach (var item in messages)
             {
@@ -116,7 +119,7 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
         {
             List<Message> list = new List<Message>();
 
-            QueueMessage[] messages = await qsc_responses.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes));
+            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_responses_deadletter.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes)));
 
             foreach (var item in messages)
             {
@@ -168,8 +171,7 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
             connectionOptions = ConnectionOptions;
             container = Container;
 
-            var conn = connectionOptions as AzureStorageQueuesConnectionOptions; 
-            
+            var conn = connectionOptions as AzureStorageQueuesConnectionOptions;             
 
             var q_name_reqs = conn.CommandQueueName = $"{conn.QueueNamePrefix.NullIfEmptyOrWhitespace() ?? "cmd"}-reqs";
             var q_name_reqs_dlq = $"{conn.QueueNamePrefix.NullIfEmptyOrWhitespace() ?? "cmd"}-reqs-dlq";
@@ -188,39 +190,50 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
             qsc_responses ??= new QueueClient(new Uri($"https://{conn.AccountName}.queue.core.windows.net/{q_name_resp}"), new StorageSharedKeyCredential(conn.AccountName, conn.AccountKey));
             qsc_responses_deadletter ??= new QueueClient(new Uri($"https://{conn.AccountName}.queue.core.windows.net/{q_name_resp_dlq}"), new StorageSharedKeyCredential(conn.AccountName, conn.AccountKey));
 
-            _ = qsc_requests.CreateIfNotExists();
-            _ = qsc_requests_deadletter.CreateIfNotExists();
-            _ = qsc_responses.CreateIfNotExists();
-            _ = qsc_responses_deadletter.CreateIfNotExists();
+            await connectionOptions.RetryPolicy.ExecuteAsync(() =>
+            {
+                _ = qsc_requests.CreateIfNotExists();
+                _ = qsc_requests_deadletter.CreateIfNotExists();
+                _ = qsc_responses.CreateIfNotExists();
+                _ = qsc_responses_deadletter.CreateIfNotExists();
+
+                return Task.CompletedTask;
+            });
 
             return await Task.FromResult(this);
         }
 
-
-
-
-
-
         private async Task<bool> _PostMessageAsync(QueueClient client, Message message)
         {
-            dynamic body = JsonConvert.DeserializeObject<ExpandoObject>(message.Text);
-            body.Metadata = message.Metadata;
+            SendReceipt b = await connectionOptions.RetryPolicy.ExecuteAsync(async () =>
+            {
+                dynamic body = JsonConvert.DeserializeObject<ExpandoObject>(message.Text);
+                body.Metadata = message.Metadata;
 
-            var r = await client.SendMessageAsync(JsonConvert.SerializeObject(body));
+                return await client.SendMessageAsync(JsonConvert.SerializeObject(body));
+            });
 
-            return r != null ? true : false;
+            return b != null ? true : false;
         }
 
         private async Task<long> _getQueueCountAsync(QueueClient queue)
         {
-            var properties = await queue?.GetPropertiesAsync();
-            return properties?.Value?.ApproximateMessagesCount ?? -1;
+            var i = await connectionOptions.RetryPolicy.ExecuteAsync<long>(async () =>
+            {
+                var properties = await queue?.GetPropertiesAsync();
+                return properties?.Value?.ApproximateMessagesCount ?? -1;
+            });
+
+            return i;
         }
 
         private async Task _deleteMessageFromQueueAsync(QueueClient client, object message)
         {
-            var m = (QueueMessage)message;
-            _ = await client.DeleteMessageAsync(m.MessageId, m.PopReceipt);
+            await connectionOptions.RetryPolicy.ExecuteAsync(async () =>
+            {
+                var m = (QueueMessage)message;
+                _ = await client.DeleteMessageAsync(m.MessageId, m.PopReceipt);
+            });
         }
     }
 }

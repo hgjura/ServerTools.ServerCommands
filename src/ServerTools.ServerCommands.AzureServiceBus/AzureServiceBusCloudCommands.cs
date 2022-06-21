@@ -27,7 +27,7 @@ namespace ServerTools.ServerCommands.AzureServiceBus
         #region Single Command functionality
         public override async Task<Message[]> GetCommandsAsync(int timeWindowinMinutes)
         {
-            IReadOnlyList<ServiceBusReceivedMessage> messages = await reqs_receiver.ReceiveMessagesAsync(maxMessages: 32, maxWaitTime: TimeSpan.FromMinutes(timeWindowinMinutes));
+            IReadOnlyList<ServiceBusReceivedMessage> messages = await connectionOptions.RetryPolicy.ExecuteAsync(() => reqs_receiver.ReceiveMessagesAsync(maxMessages: 32, maxWaitTime: TimeSpan.FromMinutes(timeWindowinMinutes)));
 
             List<Message> list = new List<Message>();
 
@@ -43,18 +43,11 @@ namespace ServerTools.ServerCommands.AzureServiceBus
 
             return list.ToArray();
         }
-
         public override async Task<Message[]> GetCommandsFromDlqAsync(int timeWindowinMinutes)
         {
+            ServiceBusReceiver dlq_reqs_receiver = client.CreateReceiver(reqs_receiver.FullyQualifiedNamespace, new ServiceBusReceiverOptions { SubQueue = SubQueue.DeadLetter });
 
-
-            ServiceBusReceiver dlq_reqs_receiver = client.CreateReceiver(reqs_receiver.FullyQualifiedNamespace, new ServiceBusReceiverOptions
-            {
-                SubQueue = SubQueue.DeadLetter
-            });
-
-
-            IReadOnlyList<ServiceBusReceivedMessage> messages = await dlq_reqs_receiver.ReceiveMessagesAsync(maxMessages: 32, maxWaitTime: TimeSpan.FromMinutes(timeWindowinMinutes));
+            IReadOnlyList<ServiceBusReceivedMessage> messages = await connectionOptions.RetryPolicy.ExecuteAsync(() => dlq_reqs_receiver.ReceiveMessagesAsync(maxMessages: 32, maxWaitTime: TimeSpan.FromMinutes(timeWindowinMinutes)));
 
             List<Message> list = new List<Message>();
 
@@ -77,23 +70,22 @@ namespace ServerTools.ServerCommands.AzureServiceBus
             => await _getQueueCountAsync(reqs_receiver_dlq.FullyQualifiedNamespace);
 
         public override async Task DeleteCommandAsync(object message)
-            => await reqs_receiver.CompleteMessageAsync((ServiceBusReceivedMessage)message);
-        
+            => await connectionOptions.RetryPolicy.ExecuteAsync(() => reqs_receiver.CompleteMessageAsync((ServiceBusReceivedMessage)message));
         public override async Task DeleteCommandFromDlqAsync(object message)
-           => await reqs_receiver_dlq.CompleteMessageAsync((ServiceBusReceivedMessage)message);
+           => await connectionOptions.RetryPolicy.ExecuteAsync(() => reqs_receiver_dlq.CompleteMessageAsync((ServiceBusReceivedMessage)message));
 
         public override async Task<bool> PostCommandAsync(Message message)
         {
             dynamic body = JsonConvert.DeserializeObject<ExpandoObject>(message.Text);
             body.Metadata = message.Metadata;
 
-            await reqs_sender.SendMessageAsync(new ServiceBusMessage(JsonConvert.SerializeObject(body)));
+            await connectionOptions.RetryPolicy.ExecuteAsync(() => reqs_sender.SendMessageAsync(new ServiceBusMessage(JsonConvert.SerializeObject(body))));
 
             return true;
         }
         public override async Task<bool> PostCommandToDlqAsync(Message message)
         {
-            await reqs_receiver.DeadLetterMessageAsync((ServiceBusReceivedMessage)message.OriginalMessage);
+            await connectionOptions.RetryPolicy.ExecuteAsync(() => reqs_receiver.DeadLetterMessageAsync((ServiceBusReceivedMessage)message.OriginalMessage));
             return true;
         }
 
@@ -191,6 +183,7 @@ namespace ServerTools.ServerCommands.AzureServiceBus
 
             admin_client = new ServiceBusAdministrationClient(conn.ConnectionString);
             client = new ServiceBusClient(conn.ConnectionString);
+
             reqs_sender = client.CreateSender(q_name_reqs);
             reqs_receiver = client.CreateReceiver(q_name_reqs);
             resp_sender = client.CreateSender(q_name_resp);
@@ -243,11 +236,13 @@ namespace ServerTools.ServerCommands.AzureServiceBus
                 "allClaims",
                 new[] { AccessRights.Manage, AccessRights.Send, AccessRights.Listen }));
 
+            await connectionOptions.RetryPolicy.ExecuteAsync(async () =>
+            {
+                if (!(await admin_client.QueueExistsAsync(q_name_resp)).Value) await admin_client.CreateQueueAsync(options2);
 
-            if (!(await admin_client.QueueExistsAsync(q_name_resp)).Value) await admin_client.CreateQueueAsync(options2);
-
-            client.CreateSender(q_name_reqs);
-            client.CreateSender(q_name_resp);
+                client.CreateSender(q_name_reqs);
+                client.CreateSender(q_name_resp);
+            });
 
             isInitialized = true;
 
@@ -256,13 +251,16 @@ namespace ServerTools.ServerCommands.AzureServiceBus
 
         public override async Task ClearAllAsync()
         {
-            if ((await admin_client.QueueExistsAsync(q_name_reqs)).Value) await admin_client.DeleteQueueAsync(q_name_reqs);
-            if ((await admin_client.QueueExistsAsync(q_name_resp)).Value) await admin_client.DeleteQueueAsync(q_name_resp);
+            await connectionOptions.RetryPolicy.ExecuteAsync(async () =>
+            {
+                if ((await admin_client.QueueExistsAsync(q_name_reqs)).Value) await admin_client.DeleteQueueAsync(q_name_reqs);
+                if ((await admin_client.QueueExistsAsync(q_name_resp)).Value) await admin_client.DeleteQueueAsync(q_name_resp);
+            });
         }
 
         private async Task<long> _getQueueCountAsync(string name)
         {
-            var properties = await admin_client.GetQueueRuntimePropertiesAsync(name);
+            var properties = await connectionOptions.RetryPolicy.ExecuteAsync(() => admin_client.GetQueueRuntimePropertiesAsync(name));
 
             return properties?.Value?.ActiveMessageCount ?? -1;
         }
