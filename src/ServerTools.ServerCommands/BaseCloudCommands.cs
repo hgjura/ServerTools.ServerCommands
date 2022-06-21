@@ -349,6 +349,6 @@ namespace ServerTools.ServerCommands
 
 
         public abstract Task ClearAllAsync();
-        public abstract Task<BaseCloudCommands> InitializeAsync(CommandContainer Container, ConnectionOptions ConnectionOptions);
+        public abstract Task<ICloudCommands> InitializeAsync(CommandContainer Container, ConnectionOptions ConnectionOptions);
     }
 }

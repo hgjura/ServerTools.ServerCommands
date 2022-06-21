@@ -16,7 +16,7 @@ namespace ServerTools.ServerCommands.Tests
     {
         static CommandContainer _container;
         static string _queueNamePrefix;
-        static BaseCloudCommands commands;
+        static ICloudCommands commands;
         static ILogger logger;  
         static IConfiguration Configuration { get; set; }
 

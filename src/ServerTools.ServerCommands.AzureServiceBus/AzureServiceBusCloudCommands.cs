@@ -166,7 +166,7 @@ namespace ServerTools.ServerCommands.AzureServiceBus
 
         #endregion
 
-        public override async Task<BaseCloudCommands> InitializeAsync(CommandContainer Container, ConnectionOptions ConnectionOptions)
+        public override async Task<ICloudCommands> InitializeAsync(CommandContainer Container, ConnectionOptions ConnectionOptions)
         {
             connectionOptions = ConnectionOptions;
             container = Container;
