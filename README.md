@@ -142,22 +142,22 @@ public class AddNumbersCommand : IRemoteCommand
 
 Now that you have the command ready to be executed, you will need to post it to be executed remotely.
 
-In its simplest form, to post a command to the server it is simply four lines of code (four steps).
+In its simplest form, to post a command to the server it is simply a few lines of code (three steps).
 * step 1: create an instance of the ```CommandContainer```. This is the IoC container that holds all registrations for the remote commands.
 * step 2: register the command you created above with the IoC container. In its simplest form, command have a parameterless constructor (like the sample above). But this is unrealistic as we want our commands to do rich and complex things, so go here to see how you can create commands with parameters and how to register them.
 * step 3: instantiate and initialize ```Commands``` store object. This is the command center for your remote commands. It only had a handful of methods though, as the complexity is hidden internally. You initialize it by calling the ```InitializeAsync()``` method. This requires two parameters:
   * first parameter, is the command container we just created
-  * second paremeter, is an implementation of the ```ConnectionOptions``` abstract class (for Azure Service Bus library is ```AzureServiceBusConnectionOptions```, for Storage Queues is ```AzureServiceBusConnectionOptions```. Construction parameters for each implementation are different, so inspect the class or look at documentation to find out when information to pass.     
+  * second parameter, is an implementation of the ```ConnectionOptions``` abstract class (for Azure Service Bus library is ```AzureServiceBusConnectionOptions```, for Storage Queues is ```AzureServiceBusConnectionOptions```. Construction parameters for each implementation are different, so inspect the class or look at documentation to find out when information to pass. 
+* step 4: post the command    
 
     
 
 ```csharp
 var _container = new CommandContainer();
-var _queueNamePrefix = "somequeueprefix";
 
 _container.RegisterCommand<AddNumbersCommand>();
 
-var c = await new CloudCommands().InitializeAsync(_container, new AzureStorageQueuesConnectionOptions(Configuration["StorageAccountName"], Configuration["StorageAccountKey"], 3, logger, QueueNamePrefix: _queueNamePrefix));
+var c = await new CloudCommands().InitializeAsync(_container, new AzureStorageQueuesConnectionOptions(Configuration["StorageAccountName"], Configuration["StorageAccountKey"], 3, logger, QueueNamePrefix: "somequeueprefix"));
 
 /// for Azure Service Bus, it looks like this
 /// var c = await new AzureServiceBus.CloudCommands().InitializeAsync(_container, new AzureServiceBusConnectionOptions(Configuration["ASBConnectionString"], 3, logger, QueueNamePrefix: _queueNamePrefix));
@@ -182,7 +182,7 @@ var _container = new CommandContainer();
 
 _container.RegisterCommand<AddNumbersCommand>();
 
-var c = await new CloudCommands().InitializeAsync(_container, new AzureStorageQueuesConnectionOptions(Configuration["StorageAccountName"], Configuration["StorageAccountKey"], 3, logger, QueueNamePrefix: _queueNamePrefix));
+var c = await new CloudCommands().InitializeAsync(_container, new AzureStorageQueuesConnectionOptions(Configuration["StorageAccountName"], Configuration["StorageAccountKey"], 3, logger, QueueNamePrefix: "somequeueprefix"));
 
 var result = await c.ExecuteCommandsAsync();
 
