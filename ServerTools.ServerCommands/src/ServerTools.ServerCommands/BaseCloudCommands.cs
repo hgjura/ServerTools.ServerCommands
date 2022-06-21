@@ -110,8 +110,7 @@ namespace ServerTools.ServerCommands
                     if (container.IsCommandRegistered(type))
                     {
                         var cmd = container.ResolveCommand(type);
-
-                        var r = await cmd?.ExecuteAsync(m, metadata);
+                        var r = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await cmd?.ExecuteAsync(m, metadata));
 
                         metadata = r.Item4;
                         metadata.CommandCompleted();
@@ -279,7 +278,7 @@ namespace ServerTools.ServerCommands
 
                     if (container.IsResponseRegistered(type))
                     {
-                        var r = await container.ResolveResponse(type)?.ExecuteAsync(m, metadata);
+                        var r = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await container.ResolveResponse(type)?.ExecuteAsync(m, metadata));
 
                         metadata = r.Item3;
                         metadata.ResponseCompleted();

@@ -63,7 +63,7 @@ namespace ServerTools.ServerCommands.Tests
 
             //var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
 
-            var dlq = commands.HandleCommandsDlqAsync(HandleDlqMessage).GetAwaiter().GetResult();
+            //var dlq = commands.HandleCommandsDlqAsync(HandleDlqMessage).GetAwaiter().GetResult();
 
         }
 
@@ -107,7 +107,7 @@ namespace ServerTools.ServerCommands.Tests
             catch (Exception ex)
             {
                 //logger.LogError(ex.Message);
-
+                throw ex;
                 return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((false, ex, null, meta));
             }
             finally
