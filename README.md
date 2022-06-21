@@ -162,7 +162,7 @@ var c = await new CloudCommands().InitializeAsync(_container, new AzureStorageQu
 /// for Azure Service Bus, it looks like this
 /// var c = await new AzureServiceBus.CloudCommands().InitializeAsync(_container, new AzureServiceBusConnectionOptions(Configuration["ASBConnectionString"], 3, logger, QueueNamePrefix: _queueNamePrefix));
 
-_ = await c.PostCommand<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
+_ = await c.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
 ```
 
 Once you post the command, you will need to create an executing context to execute them. Usually this would run in an Azure Function, an AKS container, a Windows service, a commandline, or other, and would run in a loop or in a schedule.
@@ -174,11 +174,9 @@ Since in our sample there is only one command, we are doing the registration in-
 The ```ExecuteCommandsAsync``` takes no parameters, and returns a ```tuple``` of object of type 
 ```(bool, Exception, dynamic, CommandMetadata)``` containing three items.
 
-* ```Item1```: returns ```true/false``` depending if the command executed **all** the command in the queue successfully or not.
+* ```Item1```: returns ```true/false``` depending if the command executed **all** the commands in the queue successfully or not.
 * ```Item2```: contains the number of commands executed.
-* ```Item3```: returns a ```dynamic``` object that contains the command context of the response. This **must** be populated (be not ```null``` if property ```RequiresResponse``` is set to ```true```). Otherwise return null.
-* ```Item4```: returns a ```CommandMetadata``` object that contains the metadata. This is when you may want to add additional metadata datapoints before returning it to the caller. More about it in the extended documentation. 
-
+* ```Item3```: returns a ```List<string>``` object that contains a list of all the exception messages that were thrown during the execution of commands.
 ```csharp
 var _container = new CommandContainer();
 
