@@ -35,6 +35,9 @@
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
 - [Usage](#usage)
+- [Special use cases](#special-usage)
+  - [Commands that require responses](#special-usage-responses)
+  - [Handle dead letter queues](#special-usage-dlq)
 - [Roadmap](#roadmap)
 - [Support](#support)
 - [Project assistance](#project-assistance)
@@ -52,11 +55,11 @@
 
 ServerCommands facilitates running of units of code or commands remotely. It incorporates principles of messaging architectures used by most messaging tools and frameworks, like [Azure Service Bus](https://docs.microsoft.com/en-ca/azure/service-bus-messaging/), [AWS SQS](https://aws.amazon.com/sqs/), [RabbitMQ](https://www.rabbitmq.com/), or [Azure Storage Queues](https://docs.microsoft.com/en-ca/azure/storage/queues/storage-dotnet-how-to-use-queues?tabs=dotnet), [Apache Kafka](https://kafka.apache.org/) without any of the knowledge and configuration expertise to manage such installations and configurations. 
 
-The library is made of a Core, which is used as a stand-alone only when you want to create your own implementation of the library. Most commonly, one of the implementation libraries is used, depending on the platform and service that you would like to use.
+The library is made of a Core, which is used as a stand-alone only when you want to create your own implementation of the library, and individual implementation for each service. Most commonly, one of these implementation libraries is used, depending on the platform and service that you would like to use.
 
-Each platform/service comes with its pors and cons. By no means they  are a major dependency. All messaging services work very similarly, and the choice to use Azure Storage is purely for simplictiy and cost vs. something like Azure Service Bus, which has some enhanced underlying features. Azure Storage provides both storage and queueing service at a minimal cost. In future iterations, more versions of this library that work with all the other messaging services.  
+Each platform/service comes with its pros and cons. By no means they are a major dependency. All messaging services work very similarly, and the choice to use Azure Storage is purely for simplicity and cost vs. something like Azure Service Bus, which has some enhanced underlying features. Azure Storage provides both storage and queueing service at a minimal cost. In future iterations, more versions of this library that work with all the other messaging services.  
 
-- [Release Notes](https://github.com/hgjura/ServerTools.ServerCommands/releases/tag/v0.0.2-preview2) :: [Previous Versions](https://github.com/hgjura/ServerTools.ServerCommands/blob/master/src/ServerTools.ServerCommands/nuget-releasenotes.md)
+- [Release Notes](https://github.com/hgjura/ServerTools.ServerCommands/blob/master/src/ServerTools.ServerCommands/nuget-releasenotes.md) :: [Previous Versions](https://github.com/hgjura/ServerTools.ServerCommands/releases)
 
 ## Implementations
 
@@ -65,7 +68,6 @@ Each platform/service comes with its pors and cons. By no means they  are a majo
 * AWS SQS (coming soon)
 * RabbitMQ (coming soon)
 * Apache Kafka (coming soon)
-
 
 ### Built With
 - C# (NET 6.0)
@@ -77,7 +79,7 @@ Each platform/service comes with its pors and cons. By no means they  are a majo
 ## Getting Started
 
 ### Prerequisites
-* Basic understanding of the Messaging Arhcitectures
+* Basic understanding of the Messaging Architectures
 * Understanding of the Command pattern in software development
 
 ### Installation
@@ -92,24 +94,22 @@ Add the [NuGet package](https://www.nuget.org/packages/ServerTools.ServerCommand
 * * [ServerTools.ServerCommands.AzureServiceBus]()
 * Install into each project within your solution
 
-
 ## Usage
 
 To post a remote command you first will need to create a command (in your own code) that inherits from ```IRemoteCommand```.  The interface ```IRemoteCommand``` will ask you to implement two elements:
-* ```RequiresResponse```: Is a property that returns a ```bool``` that indicates if this command will retunr a response or not. More about this in the extended documentation here. For now just return ```false```.
-* ```ExecuteAsync```: Is the method that gets executed remotely. This methid accepts a parameters of type ```dynamic``` and another of type ```CommandMetadata```:
-	* ```command``` contains the context of the command, or the command parameters. Note that cannot be a mismatch between what the command expects to run and the properties of the ```command``` parameter. For example, this sample command (```AddNumbersCommand```) expects that properties ```Number1``` and ```Number2``` two to be present in the parametr command and be of type ```int```. If they are not, this command will fail the execution.
-	* ```CommandMetadata``` contains metadata about the command. This is filled it by the library and mostly contains various ```DateTime.UtcNow``` timestamps as the command travels through the systems and goes through the stages. This is avaiable to you, but you don't have to do anything with it, unless you will delve into more expert use-cases of correlation, ordering and special deadletter queue handling.
+* ```RequiresResponse```: Is a property that returns a ```bool``` that indicates if this command will return a response or not. More about this in the extended documentation here. For now just return ```false```.
+* ```ExecuteAsync```: Is the method that gets executed remotely. This method accepts a parameters of type ```dynamic``` and another of type ```CommandMetadata```:
+  * ```command``` contains the context of the command, or the command parameters. Note that cannot be a mismatch between what the command expects to run and the properties of the ```command``` parameter. For example, this sample command (```AddNumbersCommand```) expects that properties ```Number1``` and ```Number2``` two to be present in the parameter command and be of type ```int```. If they are not, this command will fail the execution.
+  * ```CommandMetadata``` contains metadata about the command. This is filled it by the library and mostly contains various ```DateTime.UtcNow``` timestamps as the command travels through the systems and goes through the stages. This is available to you, but you don't have to do anything with it, unless you will delve into more expert use-cases of correlation, ordering and special dead letter queue handling.
 
 This method returns a ```tuple``` of object of type 
 ```(bool, Exception, dynamic, CommandMetadata)``` containing four items.
-* ```Item1```: returns ```true/false``` depending if the command executed succesfully or not.
+* ```Item1```: returns ```true/false``` depending if the command executed successfully or not.
 * ```Item2```: in case ```Item1``` is false, this returns the Exception object, otherwise ```null```.
 * ```Item3```: returns a ```dynamic``` object that contains the command context of the response. This **must** be populated (be not ```null``` if property ```RequiresResponse``` is set to ```true```). Otherwise return null.
-* ```Item4```: returns a ```CommandMetadata``` object that contains the metadata. This is when you may want to add additional metadata datapoints before returnig it to the caller.
+* ```Item4```: returns a ```CommandMetadata``` object that contains the metadata. This is when you may want to add additional metadata datapoints before returning it to the caller.
 
-
-Also, **all** exceptions must be handled within the body of the ```ExecuteAsync```. Remember, these commads are executed remotely and asynchronously. There will be nothing ruturnd to you! An unhandled exception will simply put the command back in the queue, and it will be tried **five (5)** times and then it will be placed in a dead letter queue, where it will sit until you bring it back form there to handle it properly.
+Also, **all** exceptions must be handled within the body of the ```ExecuteAsync```. Remember, these commands are executed remotely and asynchronously. There will be nothing returned to you! An unhandled exception will simply put the command back in the queue, and it will be tried **five (5)** times and then it will be placed in a dead letter queue, where it will sit until you bring it back from there to handle it properly.
 
 See example: 
 
@@ -120,35 +120,34 @@ public class AddNumbersCommand : IRemoteCommand
 
     public async Task<(bool, Exception, dynamic, dynamic)> ExecuteAsync(dynamic command, CommandMetadata meta)
     {
-		// must handle exceptions
+    // must handle exceptions
         try
         {
             int n1 = (int)command.Number1;
             int n2 = (int)command.Number2;
 
             int result = n1 + n2;
-			
-			      // set the first item to true indicating success, set the rest to null
+      
+            // set the first item to true indicating success, set the rest to null
             return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, new { Result = result, Message = "Ok." }, meta));
         }
         catch (Exception ex)
         {
-			      // set the first item to false indicating failure, set second items to the Exception thrown, set the rest to null
+            // set the first item to false indicating failure, set second items to the Exception thrown, set the rest to null
             return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((false, ex, null, meta));
         }
     }
 }
 ```
 
-
 Now that you have the command ready to be executed, you will need to post it to be executed remotely.
 
-Ini its simplest form, to post a command to the server it is simply four lines of code (four steps).
+In its simplest form, to post a command to the server it is simply four lines of code (four steps).
 * step 1: create an instance of the ```CommandContainer```. This is the IoC container that holds all registrations for the remote commands.
-* step 2: register the command you created above with the IoC container. In its simplest form, command have a parameterless constructor (like the sample above). But this is unrealistic as we want our commands to do rich and complex things, so go here to see how you can created commands with parameters and how to register them.
+* step 2: register the command you created above with the IoC container. In its simplest form, command have a parameterless constructor (like the sample above). But this is unrealistic as we want our commands to do rich and complex things, so go here to see how you can create commands with parameters and how to register them.
 * step 3: instantiate and initialize ```Commands``` store object. This is the command center for your remote commands. It only had a handful of methods though, as the complexity is hidden internally. You initialize it by calling the ```InitializeAsync()``` method. This requires two parameters:
-	* first parameter, is the command container we just created
-	* second paremeter, is an implementation of the ```ConnectionOptions``` abstract class (for Azure Service Bus library is ```AzureServiceBusConnectionOptions```, for Storage Queues is ```AzureServiceBusConnectionOptions```. Construction parameters for each implementation are different, so inspect the class or look at documentation to find out when information to pass.     
+  * first parameter, is the command container we just created
+  * second paremeter, is an implementation of the ```ConnectionOptions``` abstract class (for Azure Service Bus library is ```AzureServiceBusConnectionOptions```, for Storage Queues is ```AzureServiceBusConnectionOptions```. Construction parameters for each implementation are different, so inspect the class or look at documentation to find out when information to pass.     
 
     
 
@@ -168,18 +167,17 @@ _ = await c.PostCommand<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
 
 Once you post the command, you will need to create an executing context to execute them. Usually this would run in an Azure Function, an AKS container, a Windows service, a commandline, or other, and would run in a loop or in a schedule.
 
-To execute the commands queued in a server you will need to create an executing context (a ```Commands``` object) and register **all** the commands that are expected to have been registered remotely. Failure to register the commands that are queed would mean that the executing context will receive a command that it cannot recognize and process, and as such it will send it eventually to the deadletter queue.
+To execute the commands queued in a server you will need to create an executing context (a ```Commands``` object) and register **all** the commands that are expected to have been registered remotely. Failure to register the commands that are queued would mean that the executing context will receive a command that it cannot recognize and process, and as such it will send it eventually to the dead letter queue.
 
-Since in our sample there is only one command, we are doing the registration in-line. In your code, as you add more and more commands, you may want to mantain a utility fucntion of class that register commands as you add them, and all their dependencies, and returns a fully registered command container object to be passed to the ```Commands```.
+Since in our sample there is only one command, we are doing the registration in-line. In your code, as you add more and more commands, you may want to maintain a utility function of class that register commands as you add them, and all their dependencies, and returns a fully registered command container object to be passed to the ```Commands```.
 
 The ```ExecuteCommandsAsync``` takes no parameters, and returns a ```tuple``` of object of type 
 ```(bool, Exception, dynamic, CommandMetadata)``` containing three items.
 
-* ```Item1```: returns ```true/false``` depending if the command executed **all** the command in the queue succesfully or not.
+* ```Item1```: returns ```true/false``` depending if the command executed **all** the command in the queue successfully or not.
 * ```Item2```: contains the number of commands executed.
 * ```Item3```: returns a ```dynamic``` object that contains the command context of the response. This **must** be populated (be not ```null``` if property ```RequiresResponse``` is set to ```true```). Otherwise return null.
-* ```Item4```: returns a ```CommandMetadata``` object that contains the metadata. This is when you may want to add additional metadata datapoints before returnig it to the caller. More about it in the extended documentatino. 
-
+* ```Item4```: returns a ```CommandMetadata``` object that contains the metadata. This is when you may want to add additional metadata datapoints before returning it to the caller. More about it in the extended documentation. 
 
 ```csharp
 var _container = new CommandContainer();
@@ -197,14 +195,13 @@ Assert.IsTrue(!result.Item1);
 Assert.IsTrue(result.Item2 > 0);
 
 //check if there was any errors
-Assert.IsTrue(result.Item3.Count > 0); //This value keeps the list of error messages that were encountered. After retrying 5 times the command is moved to the deadletterqueue.
+Assert.IsTrue(result.Item3.Count > 0); //This value keeps the list of error messages that were encountered. After retrying 5 times the command is moved to the deadletter queue.
 
 ```
 
 And that's that!
 
-For more detailed documentation and more complex use cases head to the offical documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If there are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=03_question.yml&title=%5BQUERY%5D) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=02_feature_request.yml&title=%5BFEATURE+REQ%5D) do not hesitate to post them there.
-
+For more detailed documentation and more complex use cases head to the official documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If there are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=03_question.yml&title=%5BQUERY%5D) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=02_feature_request.yml&title=%5BFEATURE+REQ%5D) do not hesitate to post them there.
 
 ## Roadmap
 
@@ -223,7 +220,6 @@ See the [open issues](https://github.com/hgjura/ServerTools.ServerCommands/issue
   - [ ] Rabbit MQ
 - [x] Enable batching, batch processing and command correlations
 - [ ] Enable ordering and ordered processing through sessions
-
 
 ## Support
 
@@ -283,3 +279,5 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 > **[?]**
 > If your work was funded by any organization or institution, acknowledge their support here.
 > In addition, if your work relies on other software libraries, or was inspired by looking at other work, it is appropriate to acknowledge this intellectual debt too. -->
+
+
