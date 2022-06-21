@@ -36,8 +36,8 @@
   - [Installation](#installation)
 - [Usage](#usage)
 - [Special use cases](#special-usage)
-  - [Commands that require responses](#special-usage-responses)
-  - [Handle dead letter queues](#special-usage-dlq)
+  - [Commands that require responses](#commands-that-require-responses)
+  - [Handle dead letter queues](#handle-dead-letter-queues)
 - [Roadmap](#roadmap)
 - [Support](#support)
 - [Project assistance](#project-assistance)
@@ -198,6 +198,10 @@ Assert.IsTrue(result.Item3.Count > 0); //This value keeps the list of error mess
 ```
 
 And that's that!
+
+## Special use cases
+### Commands that require responses
+### Handle dead letter queues
 
 For more detailed documentation and more complex use cases head to the official documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If there are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=03_question.yml&title=%5BQUERY%5D) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=02_feature_request.yml&title=%5BFEATURE+REQ%5D) do not hesitate to post them there.
 
