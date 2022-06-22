@@ -75,6 +75,11 @@ namespace ServerTools.ServerCommands
 
         public CommandContainer RegisterResponse<TCommand, TResponse>(bool IsSingleton = true, bool ResolveConstructorArguments = false) where TCommand: IRemoteCommand where TResponse : IRemoteResponse
         {
+            if (!IsCommandRegistered<TCommand>())
+            {
+                RegisterCommand<TCommand>();
+            }
+
             c.Register<TResponse>(reuse: Reuse.Singleton);
 
             c.Register<IRemoteResponse, TResponse>(reuse: IsSingleton ? Reuse.Singleton : Reuse.Transient, serviceKey: typeof(TResponse).Name, made: (ResolveConstructorArguments ? FactoryMethod.ConstructorWithResolvableArguments : null));
@@ -85,6 +90,11 @@ namespace ServerTools.ServerCommands
         }
         public CommandContainer RegisterResponse<TCommand, TResponse>(TResponse instance) where TCommand : IRemoteCommand where TResponse : IRemoteResponse
         {
+            if (!IsCommandRegistered<TCommand>())
+            {
+                RegisterCommand<TCommand>();
+            }
+
             c.RegisterInstance<IRemoteResponse>(instance, serviceKey: typeof(TResponse).Name);
             
             commandresponsetypemap.Add(typeof(TCommand), typeof(TResponse));
@@ -93,6 +103,11 @@ namespace ServerTools.ServerCommands
         }
         public CommandContainer RegisterResponse<TCommand, TResponse>(Type[] const_types, bool IsSingleton = true) where TCommand : IRemoteCommand where TResponse : IRemoteResponse
         {
+            if (!IsCommandRegistered<TCommand>())
+            {
+                RegisterCommand<TCommand>();
+            }
+
             c.Register<IRemoteResponse>(reuse: IsSingleton ? Reuse.Singleton : Reuse.Transient, made: Made.Of(typeof(TResponse).GetConstructor(const_types)), serviceKey: typeof(TResponse).Name);
             
             commandresponsetypemap.Add(typeof(TCommand), typeof(TResponse));

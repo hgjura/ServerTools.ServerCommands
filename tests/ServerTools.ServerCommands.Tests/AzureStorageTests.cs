@@ -54,14 +54,13 @@ namespace ServerTools.ServerCommands.Tests
         {
             _container
                 .Use(logger)
-                .RegisterCommand<AddNumbersCommand>()
                 .RegisterResponse<AddNumbersCommand, AddNumbersResponse>();
 
             //_ = commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 }).GetAwaiter().GetResult();
 
             //var result1 = commands.ExecuteCommandsAsync().GetAwaiter().GetResult();
 
-            //var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
+            var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
 
             //var dlq = commands.HandleCommandsDlqAsync(HandleDlqMessage).GetAwaiter().GetResult();
 

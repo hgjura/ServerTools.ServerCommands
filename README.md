@@ -70,6 +70,7 @@ Each platform/service comes with its pros and cons. By no means they are a major
 * Apache Kafka (coming soon)
 
 ### Built With
+
 - C# (NET 6.0)
 - NewtonSoft.Json
 - Microsoft.Extensions.Logging
@@ -200,8 +201,137 @@ Assert.IsTrue(result.Item3.Count > 0); //This value keeps the list of error mess
 And that's that!
 
 ## Special use cases
+
 ### Commands that require responses
+
+Though rare, there are instances when you need to return a response after executing a comman. A response is a way for a system to alert another system that a command has been executed succesfully, and provide some feedback context to do additional work. By combining commands with responses you can creat a multistep workflow, if necessary.
+
+For example, the ```AddNumbersCommand```, which adds two numbers, let's say 2 + 3, generates a ```AddNumbersResponse``` that contains the result, or number 5. This is way too simplistic, but you get the point. The responses are generated and placed in a separate queue. You retrieve and execte responses, the same way you retreive and execute commands. In fact responses are just like commands, but they are attached to a command.
+
+Here is some code on how to execute a command that generates a response, and then executing that response.
+
+
+```csharp
+var _container = new CommandContainer();
+
+_container.RegisterCommand<AddNumbersCommand, AddNumbersResponse>();
+
+var c = await new CloudCommands().InitializeAsync(_container, new AzureStorageQueuesConnectionOptions(Configuration["StorageAccountName"], Configuration["StorageAccountKey"], 3, logger, QueueNamePrefix: "somequeueprefix"));
+
+var result = await c.ExecuteCommandsAsync();
+
+//check if something was wrong or if any items were processed at all
+Assert.IsTrue(!result.Item1);
+
+//check if 1 or more items were processed
+Assert.IsTrue(result.Item2 > 0);
+
+//check if there was any errors
+Assert.IsTrue(result.Item3.Count > 0); //This value keeps the list of error messages that were encountered. After retrying 5 times the command is moved to the deadletter queue.
+
+
+var responses = await c.ExecuteResponsesAsync();
+
+//check if something was wrong or if any items were processed at all
+Assert.IsTrue(!responses.Item1);
+
+//check if 1 or more items were processed
+Assert.IsTrue(responses.Item2 > 0);
+
+//check if there was any errors
+Assert.IsTrue(responses.Item3.Count > 0); //This value keeps the list of error messages that were encountered. After retrying 5 times the command is moved to the deadletter queue.
+
+```
+And this is the configuration of the commands and the accompaning response. Note that whatever context is returned as Item3 from the command, becomes the context going into the response. You dont have to create the response, the library creates the response and posts for you. 
+
+```csharp
+    public class AddNumbersCommand : IRemoteCommand
+    {
+        private ILogger logger;
+        public AddNumbersCommand(ILogger logger)
+        {
+            this.logger = logger;
+        }
+
+        public bool RequiresResponse => true;
+
+        public async Task<(bool, Exception, dynamic, CommandMetadata)> ExecuteAsync(dynamic command, CommandMetadata meta)
+        {
+            logger ??= new DebugLoggerProvider().CreateLogger("default");
+
+            try
+            {
+                int n1 = (int)command.Number1;
+                int n2 = (int)command.Number2;
+
+                int result = n1 + n2;
+
+                logger.LogInformation($"<< {n1} + {n2} = {n1 + n2} >>");
+
+                return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, new { Result = result, Message = "Ok." }, meta));
+            }
+            catch (Exception ex)
+            {
+                //logger.LogError(ex.Message);
+                throw ex;
+                return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((false, ex, null, meta));
+            }
+            finally
+            {
+
+            }
+        }
+
+    }
+
+    public class AddNumbersResponse : IRemoteResponse
+    {
+        private ILogger logger;
+        public AddNumbersResponse(ILogger logger)
+        {
+            this.logger = logger;
+        }
+        public async Task<(bool, Exception, CommandMetadata)> ExecuteAsync(dynamic response, CommandMetadata metadata)
+        {
+            logger ??= new DebugLoggerProvider().CreateLogger("default");
+
+            try
+            {
+                var r = (int)response.Result;
+                var m = (string)response.Message;
+
+                logger.LogInformation($"<< Result from the command is in: Result = {r} | Message = {m} >>");
+
+                return await Task.FromResult<(bool, Exception, CommandMetadata)>((true, null, metadata));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.Message);
+
+                return await Task.FromResult<(bool, Exception, CommandMetadata)>((false, ex, metadata));
+            }
+            finally
+            {
+
+            }
+        }
+    }
+```
+
+Note that comands and responses are run separately and in a different context. You could easily priorotize commands in a more frequent context, and execute responses in a separate context that runs slower or has a lower prority.
+
 ### Handle dead letter queues
+
+
+
+
+
+
+
+
+
+
+
 
 For more detailed documentation and more complex use cases head to the official documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If there are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=03_question.yml&title=%5BQUERY%5D) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=02_feature_request.yml&title=%5BFEATURE+REQ%5D) do not hesitate to post them there.
 

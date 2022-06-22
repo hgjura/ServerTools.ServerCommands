@@ -33,8 +33,7 @@ namespace ServerTools.ServerCommands
             if (PreviousMatadata.UniqueId == null)
                 meta.CommandStartNew(type_name);
             else
-                meta.CommandResubmitFromDLQ();
-            
+                meta.CommandResubmitFromDLQ();            
 
             var r = await PostCommandAsync(new Message("", JsonConvert.SerializeObject(commandBody), 0, meta.CommandDeadletterQueueRetryCount, meta, null));
 
