@@ -50,20 +50,20 @@ namespace ServerTools.ServerCommands.Tests
 
 
         [TestMethod]
-        public void I1000_TestIntegrationWithAzureStorageQueues()
+        public async Task I1000_TestIntegrationWithAzureStorageQueues()
         {
             _container
                 .Use(logger)
                 .RegisterResponse<AddNumbersCommand, AddNumbersResponse>();
 
-            //_ = commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 }).GetAwaiter().GetResult();
+            //_ = commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
 
-            //var result1 = commands.ExecuteCommandsAsync().GetAwaiter().GetResult();
+            //var result1 = commands.ExecuteCommandsAsync();
 
-            //var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
+            //var result2 = commands.ExecuteResponsesAsync();
 
-            //var dlq = commands.HandleCommandsDlqAsync(HandleDlqMessage).GetAwaiter().GetResult();
-            //var dlq = commands.HandleResponsesDlqAsync(HandleDlqMessage).GetAwaiter().GetResult();
+            //var dlq = commands.HandleCommandsDlqAsync(HandleDlqMessage);
+            //var dlq = await commands.HandleResponsesDlqAsync(HandleDlqMessage);
         }
 
 
