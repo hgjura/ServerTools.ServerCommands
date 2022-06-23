@@ -59,9 +59,8 @@ The library is made of a Core, which is used as a stand-alone only when you want
 
 Each platform/service comes with its pros and cons. By no means they are a major dependency. All messaging services work very similarly, and the choice to use Azure Storage is purely for simplicity and cost vs. something like Azure Service Bus, which has some enhanced underlying features. Azure Storage provides both storage and queueing service at a minimal cost. In future iterations, more versions of this library that work with all the other messaging services.  
 
----
-For a practical implementation of this library, and its features, look into this separate project [Command Pattern With Queues.](https://github.com/hgjura/command-pattern-with-queues)
----
+> For a practical implementation of this library, and its features, look into this separate project [Command Pattern With Queues.](https://github.com/hgjura/command-pattern-with-queues)
+
 
 
 
