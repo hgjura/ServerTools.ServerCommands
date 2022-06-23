@@ -207,6 +207,17 @@ And that's that!
 
 ## Special use cases
 
+### Metadata
+
+Every ```Message``` object contains a ```CommandMetadata``` object. This object collects primarily timestamps of various stages that the message goes through. This can help see a message through time and make certain decisions about it.
+
+It also has a ```UniqueId``` that you can use to correlate the message with others. There is also a ```CustomMetadata``` of type ```Dictionary<string, object>``` so you can slip in your own metadata.
+
+The ```Message``` object itself has two special properties ```DequeueCount``` and ```DlqDequeueCount```, which are the number of times the message is read from the main queue, and the number of times the message is posted into the DLQ.
+
+> Note that the metadata is added to the message overall size.
+> Note that ```DequeueCount``` for the message is reset (to 0) every time the message is placed in the main queue. While ```DlqDequeueCount``` is retained throughout the lifecycle of the message, until is permanently removed from the system.
+
 ### Commands that require responses
 
 Though rare, there are instances when you need to return a response after executing a comman. A response is a way for a system to alert another system that a command has been executed succesfully, and provide some feedback context to do additional work. By combining commands with responses you can creat a multistep workflow, if necessary.
