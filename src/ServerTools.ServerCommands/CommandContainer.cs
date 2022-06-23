@@ -69,9 +69,15 @@ namespace ServerTools.ServerCommands
         {
             return c.Resolve<IRemoteCommand>(serviceKey: serviceKey);
         }
+
+        public CommandContainer RegisterCommand<TCommand, TResponse>(bool IsSingleton = true, bool ResolveConstructorArguments = false) where TCommand : IRemoteCommand where TResponse : IRemoteResponse
+        {
+            return RegisterResponse<TCommand, TResponse>(IsSingleton, ResolveConstructorArguments);
+        }
+
         #endregion
 
-        #region Responses
+            #region Responses
 
         public CommandContainer RegisterResponse<TCommand, TResponse>(bool IsSingleton = true, bool ResolveConstructorArguments = false) where TCommand: IRemoteCommand where TResponse : IRemoteResponse
         {
