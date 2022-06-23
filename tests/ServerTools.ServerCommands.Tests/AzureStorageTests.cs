@@ -60,16 +60,16 @@ namespace ServerTools.ServerCommands.Tests
 
             //var result1 = commands.ExecuteCommandsAsync().GetAwaiter().GetResult();
 
-            var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
+            //var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
 
             //var dlq = commands.HandleCommandsDlqAsync(HandleDlqMessage).GetAwaiter().GetResult();
-
+            //var dlq = commands.HandleResponsesDlqAsync(HandleDlqMessage).GetAwaiter().GetResult();
         }
 
 
         public bool HandleDlqMessage(Message m)
         {
-            return m.DlqDequeueCount >= 2 ? false : true;
+            return m.DlqDequeueCount >= 2 || m.Metadata.CommandPostedOn < DateTime.UtcNow.AddMinutes(-30) ? false : true;
         }
        
 

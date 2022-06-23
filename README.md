@@ -59,6 +59,8 @@ The library is made of a Core, which is used as a stand-alone only when you want
 
 Each platform/service comes with its pros and cons. By no means they are a major dependency. All messaging services work very similarly, and the choice to use Azure Storage is purely for simplicity and cost vs. something like Azure Service Bus, which has some enhanced underlying features. Azure Storage provides both storage and queueing service at a minimal cost. In future iterations, more versions of this library that work with all the other messaging services.  
 
+For a practical implementation of this library, and its features, look into this separate project [Command Pattern With Queues.](https://github.com/hgjura/command-pattern-with-queues)
+
 - [Release Notes](https://github.com/hgjura/ServerTools.ServerCommands/blob/master/src/ServerTools.ServerCommands/nuget-releasenotes.md) :: [Previous Versions](https://github.com/hgjura/ServerTools.ServerCommands/releases)
 
 ## Implementations
@@ -210,7 +212,6 @@ For example, the ```AddNumbersCommand```, which adds two numbers, let's say 2 + 
 
 Here is some code on how to execute a command that generates a response, and then executing that response.
 
-
 ```csharp
 var _container = new CommandContainer();
 
@@ -240,8 +241,9 @@ Assert.IsTrue(responses.Item2 > 0);
 
 //check if there was any errors
 Assert.IsTrue(responses.Item3.Count > 0); //This value keeps the list of error messages that were encountered. After retrying 5 times the command is moved to the deadletter queue.
-
 ```
+
+
 And this is the configuration of the commands and the accompaning response. Note that whatever context is returned as Item3 from the command, becomes the context going into the response. You dont have to create the response, the library creates the response and posts for you. 
 
 ```csharp
@@ -281,7 +283,6 @@ And this is the configuration of the commands and the accompaning response. Note
 
             }
         }
-
     }
 
     public class AddNumbersResponse : IRemoteResponse
@@ -297,8 +298,8 @@ And this is the configuration of the commands and the accompaning response. Note
 
             try
             {
-                var r = (int)response.Result;
-                var m = (string)response.Message;
+                var r = (int) response.Result;
+                var m = (string) response.Message;
 
                 logger.LogInformation($"<< Result from the command is in: Result = {r} | Message = {m} >>");
 
@@ -321,6 +322,70 @@ And this is the configuration of the commands and the accompaning response. Note
 Note that comands and responses are run separately and in a different context. You could easily priorotize commands in a more frequent context, and execute responses in a separate context that runs slower or has a lower prority.
 
 ### Handle dead letter queues
+
+In Messaging-based architectures and solutions, the concept of the deadletter queue is one of the most important and unusual concepts. All messaging solutions focus primarily in speed (scale) and asynchronicity. In order to achive these high traffic speeds and loads, they need a way to put messages aside if something happens to them, to reprocess them at a later date.
+
+The deadletter queue is a place where messages and date are kept in suspended animation. Generally the lifespan of a message in the deadletter queue (DLQ) is rather short (a few minutes, maybe 15-20 minutes at most), just enough to give the system (the client context or subscriber) a chance to recover and try again. In some rare curcumstaces, when the system processes very little data and at longer intervals the messages in the DLQ are kept for a longer period, but this is the exception.
+
+As messages are dormant in the DLQ, in suspended animation, we can't keep them there forever! You dont want the DLQ to turn into a graveyard for messages or a trashcan of unprocessed messages. In fact, yuo may want to start planning about what to do and how to handle the DLQ, before you start planning on how to handle messages in the main queue.
+
+In handling the DLQ, there are usually two main patterns/strategies that are used to deal with or flush the messages in the queue:
+* Pattern 1. The most simple an intuitive. Used 90% of the time. You just simply take the messages and put tham back into the main queue for reprocessing. You need to make sure that you allow for a timespan (of lets say 15-20 minutes) before the messages are put back in the queue. The timespan is based in the confidence you have for whatever issue there was with the messages or the subcriber, it is solved within that timespan. Otherwise, if you do it to soon you risk creating an infinite loop of messging going into the queue and failing or expiring and back into the queue again.  
+* Pattern 2. You create a separate context to process the DLQ exlusively. You decide there and than on what to do with the message, either process it, arhcive it or delete it, based on some condition of the message itself. So the message does not go back in the queue, but it makes a rather one-way trip to the DLQ and somewhere else form there.
+
+Nothing stops you to use one or both of these patterns in your code. As you will see the library makes it easy to combine them both.
+
+To handle the DLQ with this library you call the  methods ```HandleCommandsDlqAsync()``` and ```HandleResponsesDlqAsync()```. These two methods are implemented similarly, but obviously one handles the commands dlq and the other the responses dlq.
+
+The ```HandleCommandsDlqAsync()``` and ```HandleResponsesDlqAsync()``` take two optonal parmeters, ```Func<Message, bool> ValidateProcessing = null``` and ```int timeWindowinMinutes = 1```. The ```timeWindowinMinutes``` is obvious, it the window in time that the processor uses to keep the processing open. It defaults to 1 minute. The ```ValidateProcessing```, will talk about this in a second.
+
+To satisfy the Pattern 1 above, you simply call ```HandleCommandsDlqAsync()``` without passing any parameter. It will simply take all the messages in the DLQ, record a couple of items in the metadata object and put them back in the queue, and delete the orginal message form the DLQ. It ptractucally flushes the DLQ.
+
+To satisfy the Pattern 2 above, you will need to have some logic to decide what to do with each message, prior to deciding if you want to put the message back in the queue. This can be a decision based on the metadata object that accompanies the message. For example, the Message object has a property called ```DlqDequeueCount```, This is the number of iterations that a message makes form the main queue to the dlq. You may decide that after 3 iterations in the DLQ, than delete the message altogether, or archive it somewhere else. Or you can use the ```Metadata.CommandPostedOn``` to get the timestamp of the original message time (this is the time when the first message was posted), and decide to delete the message after a certain time. You would implement that this way:
+
+```csharp
+public bool HandleDlqMessage(Message m)
+{
+  return m.DlqDequeueCount >= 2 ? false : true;
+}
+var dlq = await commands.HandleCommandsDlqAsync(HandleDlqMessage)
+
+```
+
+If the ```Func``` parameter returns ```false```, after any custom logic and processing you decide, than the outcome is that the library will simply remove the message form the DLQ hence deleting forever (you may decide to log a message or archive the message somewhere else). If it returns ```true```, than the library falls into the Pattern 1 for that message, and posts it into the main queue, and removes it from the DLQ>
+
+As ou can see this option allows you to satisfy both Pattern 1 or Pattern 2, or a combination thereof.
+
+Here is the full code for this:
+
+```csharp
+public void I1000_TestIntegrationWithAzureStorageQueues()
+{
+  _container
+    .Use(logger)
+    .RegisterResponse<AddNumbersCommand, AddNumbersResponse>();
+
+    //_ = await commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
+
+    //var result1 = await commands.ExecuteCommandsAsync();
+    //var result2 = await commands.ExecuteResponsesAsync();
+
+    var dlq1 = await commands.HandleCommandsDlqAsync(HandleDlqMessage);
+    var dlq1 = await commands.HandleResponsesDlqAsync(HandleDlqMessage)
+}
+
+
+public bool HandleDlqMessage(Message m) 
+{
+  return m.DlqDequeueCount >= 2 || m.Metadata.CommandPostedOn < DateTime.UtcNow.AddMinutes(-30) ? false : true;
+}
+
+```
+
+
+
+
+
 
 
 
