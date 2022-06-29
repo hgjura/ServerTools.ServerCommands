@@ -215,8 +215,9 @@ It also has a ```UniqueId``` that you can use to correlate the message with othe
 
 The ```Message``` object itself has two special properties ```DequeueCount``` and ```DlqDequeueCount```, which are the number of times the message is read from the main queue, and the number of times the message is posted into the DLQ.
 
+```DequeueCount``` for the message is reset (to 0) every time the message is placed in the main queue. While ```DlqDequeueCount``` is retained throughout the lifecycle of the message, until is permanently removed from the system.
+
 > Note that the metadata is added to the message overall size.
-> Note that ```DequeueCount``` for the message is reset (to 0) every time the message is placed in the main queue. While ```DlqDequeueCount``` is retained throughout the lifecycle of the message, until is permanently removed from the system.
 
 ### Commands that require responses
 

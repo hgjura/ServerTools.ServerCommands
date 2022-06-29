@@ -91,22 +91,22 @@ namespace ServerTools.ServerCommands.Tests
 
             try
             {
-                throw new Exception("TEST EXCEPTION COMMAND");
+                //throw new Exception("TEST EXCEPTION COMMAND");
                 int n1 = (int)command.Number1;
                 int n2 = (int)command.Number2;
 
                 int result = n1 + n2;
 
                 logger.LogInformation($"<< {n1} + {n2} = {n1 + n2} >>");
-
                 return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, new { Result = result, Message = "Ok." }, meta));
+
 
 
             }
             catch (Exception ex)
             {
-                //logger.LogError(ex.Message);
-                throw ex;
+                logger.LogError(ex.Message);
+                //throw ex;
                 return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((false, ex, null, meta));
             }
             finally
@@ -130,7 +130,7 @@ namespace ServerTools.ServerCommands.Tests
 
             try
             {
-                throw new Exception("TEST EXCEPTION");
+                //throw new Exception("TEST EXCEPTION");
 
                 var r = (int)response.Result;
                 var m = (string)response.Message;

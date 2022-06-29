@@ -15,7 +15,7 @@ namespace ServerTools.ServerCommands.Tests
     {
         static CommandContainer _container;
         static string _queueNamePrefix;
-        static BaseCloudCommands commands;
+        static ICloudCommands commands;
         static ILogger logger;
         static IConfiguration Configuration { get; set; }
 
@@ -38,29 +38,37 @@ namespace ServerTools.ServerCommands.Tests
 
             _container = new CommandContainer();
             _queueNamePrefix = nameof(UnitTestsForServerCommands).ToLower();
-            //commands = await new AzureServiceBus.CloudCommands().InitializeAsync(_container, new AzureServiceBusConnectionOptions(Configuration["ASBConnectionString"], 3, logger, QueueNamePrefix: _queueNamePrefix));
+            commands = await new AzureServiceBus.CloudCommands().InitializeAsync(_container, new AzureServiceBusConnectionOptions(Configuration["ASBConnectionString"], 3, logger, QueueNamePrefix: _queueNamePrefix));
         }
 
         [ClassCleanup()]
-        public static void CleanTestSuite()
+        public static async Task CleanTestSuiteAsync()
         {
-            //commands.ClearAllAsync().GetAwaiter().GetResult();
+            await commands.ClearAllAsync();
         }
 
 
         [TestMethod]
-        public void I1000_TestIntegrationWithServiceBus()
+        public Task I1000_TestIntegrationWithServiceBusAsync()
         {
             _container
                 .Use(logger)
-                .RegisterCommand<AddNumbersCommand>()
-                .RegisterResponse<AddNumbersCommand, AddNumbersResponse>();
+                
+                //.RegisterCommand<AddNumbersCommand>();
+                //.RegisterResponse<AddNumbersResponse>();
+                
+                .RegisterCommand<AddNumbersCommand, AddNumbersResponse>();
+                
+                //.RegisterResponse<AddNumbersCommand, AddNumbersResponse>();
+
+                //the three ways above to registering a command + response above are equivalent
 
             //_ = commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 }).GetAwaiter().GetResult();
 
             //var result1 = commands.ExecuteCommandsAsync().GetAwaiter().GetResult();
-
             //var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
+
+            return Task.CompletedTask;
 
         }
 

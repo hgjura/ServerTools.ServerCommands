@@ -45,7 +45,7 @@ namespace ServerTools.ServerCommands.AzureServiceBus
         }
         public override async Task<Message[]> GetCommandsFromDlqAsync(int timeWindowinMinutes)
         {
-            ServiceBusReceiver dlq_reqs_receiver = client.CreateReceiver(reqs_receiver.FullyQualifiedNamespace, new ServiceBusReceiverOptions { SubQueue = SubQueue.DeadLetter });
+            ServiceBusReceiver dlq_reqs_receiver = client.CreateReceiver(reqs_receiver.EntityPath, new ServiceBusReceiverOptions { SubQueue = SubQueue.DeadLetter });
 
             IReadOnlyList<ServiceBusReceivedMessage> messages = await connectionOptions.RetryPolicy.ExecuteAsync(() => dlq_reqs_receiver.ReceiveMessagesAsync(maxMessages: 32, maxWaitTime: TimeSpan.FromMinutes(timeWindowinMinutes)));
 
@@ -65,9 +65,9 @@ namespace ServerTools.ServerCommands.AzureServiceBus
         }
 
         public override async Task<long> GetCommandsCountAsync() 
-            => await _getQueueCountAsync(reqs_receiver.FullyQualifiedNamespace);
+            => await _getQueueCountAsync(reqs_receiver.EntityPath);
         public override async Task<long> GetCommandsDlqCountAsync()
-            => await _getQueueCountAsync(reqs_receiver_dlq.FullyQualifiedNamespace);
+            => await _getQueueCountAsync(reqs_receiver_dlq.EntityPath);
 
         public override async Task DeleteCommandAsync(object message)
             => await connectionOptions.RetryPolicy.ExecuteAsync(() => reqs_receiver.CompleteMessageAsync((ServiceBusReceivedMessage)message));
@@ -131,7 +131,7 @@ namespace ServerTools.ServerCommands.AzureServiceBus
         public override async Task<Message[]> GetResponsesFromDlqAsync(int timeWindowinMinutes)
         {
 
-            ServiceBusReceiver dlq_resp_receiver = client.CreateReceiver(resp_receiver.FullyQualifiedNamespace, new ServiceBusReceiverOptions
+            ServiceBusReceiver dlq_resp_receiver = client.CreateReceiver(resp_receiver.EntityPath, new ServiceBusReceiverOptions
             {
                 SubQueue = SubQueue.DeadLetter
             });
@@ -155,9 +155,9 @@ namespace ServerTools.ServerCommands.AzureServiceBus
         }
 
         public override async Task<long> GetResponsesCountAsync() 
-            => await _getQueueCountAsync(resp_receiver.FullyQualifiedNamespace);
+            => await _getQueueCountAsync(resp_receiver.EntityPath);
         public override async Task<long> GetResponsesDlqCountAsync()
-            => await _getQueueCountAsync(resp_receiver_dlq.FullyQualifiedNamespace);
+            => await _getQueueCountAsync(resp_receiver_dlq.EntityPath);
 
         public override async Task DeleteResponseAsync(object message)
             => await resp_receiver.CompleteMessageAsync((ServiceBusReceivedMessage)message);
@@ -184,14 +184,6 @@ namespace ServerTools.ServerCommands.AzureServiceBus
             admin_client = new ServiceBusAdministrationClient(conn.ConnectionString);
             client = new ServiceBusClient(conn.ConnectionString);
 
-            reqs_sender = client.CreateSender(q_name_reqs);
-            reqs_receiver = client.CreateReceiver(q_name_reqs);
-            resp_sender = client.CreateSender(q_name_resp);
-            resp_receiver = client.CreateReceiver(q_name_resp);
-
-            reqs_receiver_dlq = client.CreateReceiver(q_name_reqs, new ServiceBusReceiverOptions { SubQueue = SubQueue.DeadLetter });
-            resp_receiver_dlq = client.CreateReceiver(q_name_resp, new ServiceBusReceiverOptions { SubQueue = SubQueue.DeadLetter });
-
             var options1 = new CreateQueueOptions(q_name_reqs)
             {
                 //AutoDeleteOnIdle = TimeSpan.FromDays(7),
@@ -214,6 +206,15 @@ namespace ServerTools.ServerCommands.AzureServiceBus
                 new[] { AccessRights.Manage, AccessRights.Send, AccessRights.Listen }));
 
             if (!(await admin_client.QueueExistsAsync(q_name_reqs)).Value) await admin_client.CreateQueueAsync(options1);
+
+            await connectionOptions.RetryPolicy.ExecuteAsync(async () =>
+            {
+                if (!(await admin_client.QueueExistsAsync(q_name_reqs)).Value) await admin_client.CreateQueueAsync(options1);
+
+                reqs_sender = client.CreateSender(q_name_reqs);
+                reqs_receiver = client.CreateReceiver(q_name_reqs);
+                reqs_receiver_dlq = client.CreateReceiver(q_name_reqs, new ServiceBusReceiverOptions { SubQueue = SubQueue.DeadLetter });
+            });
 
             var options2 = new CreateQueueOptions(q_name_resp)
             {
@@ -240,8 +241,9 @@ namespace ServerTools.ServerCommands.AzureServiceBus
             {
                 if (!(await admin_client.QueueExistsAsync(q_name_resp)).Value) await admin_client.CreateQueueAsync(options2);
 
-                client.CreateSender(q_name_reqs);
-                client.CreateSender(q_name_resp);
+                resp_sender = client.CreateSender(q_name_resp);
+                resp_receiver = client.CreateReceiver(q_name_resp);
+                resp_receiver_dlq = client.CreateReceiver(q_name_resp, new ServiceBusReceiverOptions { SubQueue = SubQueue.DeadLetter });
             });
 
             isInitialized = true;
@@ -260,6 +262,7 @@ namespace ServerTools.ServerCommands.AzureServiceBus
 
         private async Task<long> _getQueueCountAsync(string name)
         {
+
             var properties = await connectionOptions.RetryPolicy.ExecuteAsync(() => admin_client.GetQueueRuntimePropertiesAsync(name));
 
             return properties?.Value?.ActiveMessageCount ?? -1;

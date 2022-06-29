@@ -143,6 +143,7 @@ namespace ServerTools.ServerCommands
 
         public async Task<(bool, int)> HandleCommandsDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1) 
         {
+            //tupple return: Item1: (bool) - if all commands have been processed succesfully or not | Item2: (int) - number of commands that were processed/returned from the remote queue
             var result = (true, 0);
 
             while (true)
