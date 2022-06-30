@@ -3,9 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ServerTools.ServerCommands.AzureServiceBus;
-using ServerTools.ServerCommands.AzureStorageQueues;
-using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace ServerTools.ServerCommands.Tests
@@ -49,7 +46,7 @@ namespace ServerTools.ServerCommands.Tests
 
 
         [TestMethod]
-        public Task I1000_TestIntegrationWithServiceBusAsync()
+        public async Task I1000_TestIntegrationWithServiceBusAsync()
         {
             _container
                 .Use(logger)
@@ -58,23 +55,16 @@ namespace ServerTools.ServerCommands.Tests
                 //.RegisterResponse<AddNumbersResponse>();
                 
                 .RegisterCommand<AddNumbersCommand, AddNumbersResponse>();
-                
+
                 //.RegisterResponse<AddNumbersCommand, AddNumbersResponse>();
 
                 //the three ways above to registering a command + response above are equivalent
 
-            //_ = commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 }).GetAwaiter().GetResult();
+            _ = commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
 
-            //var result1 = commands.ExecuteCommandsAsync().GetAwaiter().GetResult();
-            //var result2 = commands.ExecuteResponsesAsync().GetAwaiter().GetResult();
-
-            return Task.CompletedTask;
+            var result1 = await commands.ExecuteCommandsAsync();
+            var result2 = await commands.ExecuteResponsesAsync();
 
         }
-
-
-
     }
-
-
 }

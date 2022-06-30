@@ -1,12 +1,9 @@
-﻿using FastExpressionCompiler.LightExpression;
-using Microsoft.Azure.Amqp.Encoding;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ServerTools.ServerCommands.AzureStorageQueues;
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace ServerTools.ServerCommands.Tests
@@ -43,9 +40,9 @@ namespace ServerTools.ServerCommands.Tests
         }
 
         [ClassCleanup()]
-        public static void CleanTestSuite()
+        public static async Task CleanTestSuiteAsync()
         {
-            //new AzureStorageQueuesCloudCommands(_container, Configuration["StorageAccountName"], Configuration["StorageAccountKey"], null, QueueNamePrefix: _queueNamePrefix).ClearAll();
+            await commands.ClearAllAsync();
         }
 
 
@@ -56,14 +53,14 @@ namespace ServerTools.ServerCommands.Tests
                 .Use(logger)
                 .RegisterResponse<AddNumbersCommand, AddNumbersResponse>();
 
-            //_ = commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
+            _ = commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
 
-            //var result1 = commands.ExecuteCommandsAsync();
+            var result1 = commands.ExecuteCommandsAsync();
 
-            //var result2 = commands.ExecuteResponsesAsync();
+            var result2 = commands.ExecuteResponsesAsync();
 
-            //var dlq = commands.HandleCommandsDlqAsync(HandleDlqMessage);
-            //var dlq = await commands.HandleResponsesDlqAsync(HandleDlqMessage);
+            var dlq_comm = await commands.HandleCommandsDlqAsync(HandleDlqMessage);
+            var dlq_resp = await commands.HandleResponsesDlqAsync(HandleDlqMessage);
         }
 
 
@@ -98,8 +95,8 @@ namespace ServerTools.ServerCommands.Tests
                 int result = n1 + n2;
 
                 logger.LogInformation($"<< {n1} + {n2} = {n1 + n2} >>");
-                return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, new { Result = result, Message = "Ok." }, meta));
-
+                //return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, new { Result = result, Message = "Ok." }, meta));
+                return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, null, meta));
 
 
             }

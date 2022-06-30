@@ -59,10 +59,10 @@ jobs:
         dotnet user-secrets set "StorageAccountKey" ${{ secrets.ACCT_KEY }}
       working-directory: ./tests/ServerTools.ServerCommands.Tests/
 
-    - name: Test
-      run: |
-        dotnet test --verbosity minimal --configuration Release
-      working-directory: ./
+    # - name: Test
+    #   run: |
+    #     dotnet test --verbosity minimal --configuration Release
+    #   working-directory: ./
 
     - name: Get Last Release Id
       id: latest-release
