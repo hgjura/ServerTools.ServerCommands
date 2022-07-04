@@ -25,9 +25,10 @@ namespace ServerTools.ServerCommands.AzureServiceBus
         ServiceBusReceiver resp_receiver_dlq;
 
         #region Single Command functionality
-        public override async Task<Message[]> GetCommandsAsync(int timeWindowinMinutes)
+        public override async Task<Message[]> GetCommandsAsync()
         {
-            IReadOnlyList<ServiceBusReceivedMessage> messages = await connectionOptions.RetryPolicy.ExecuteAsync(() => reqs_receiver.ReceiveMessagesAsync(maxMessages: 32, maxWaitTime: TimeSpan.FromMinutes(timeWindowinMinutes)));
+            AzureServiceBusConnectionOptions conn = (AzureServiceBusConnectionOptions)connectionOptions;
+            IReadOnlyList<ServiceBusReceivedMessage> messages = await connectionOptions.RetryPolicy.ExecuteAsync(() => reqs_receiver.ReceiveMessagesAsync(maxMessages: conn.MaxMessagesToRetrieve, maxWaitTime: conn.MaxWaitTime ?? TimeSpan.FromMinutes(1)));
 
             List<Message> list = new List<Message>();
 
@@ -43,11 +44,13 @@ namespace ServerTools.ServerCommands.AzureServiceBus
 
             return list.ToArray();
         }
-        public override async Task<Message[]> GetCommandsFromDlqAsync(int timeWindowinMinutes)
+        public override async Task<Message[]> GetCommandsFromDlqAsync()
         {
             ServiceBusReceiver dlq_reqs_receiver = client.CreateReceiver(reqs_receiver.EntityPath, new ServiceBusReceiverOptions { SubQueue = SubQueue.DeadLetter });
 
-            IReadOnlyList<ServiceBusReceivedMessage> messages = await connectionOptions.RetryPolicy.ExecuteAsync(() => dlq_reqs_receiver.ReceiveMessagesAsync(maxMessages: 32, maxWaitTime: TimeSpan.FromMinutes(timeWindowinMinutes)));
+            AzureServiceBusConnectionOptions conn = (AzureServiceBusConnectionOptions)connectionOptions;
+            
+            IReadOnlyList<ServiceBusReceivedMessage> messages = await connectionOptions.RetryPolicy.ExecuteAsync(() => dlq_reqs_receiver.ReceiveMessagesAsync(maxMessages: conn.MaxMessagesToRetrieve, maxWaitTime: conn.MaxWaitTime ?? TimeSpan.FromMinutes(1)));
 
             List<Message> list = new List<Message>();
 
@@ -110,9 +113,11 @@ namespace ServerTools.ServerCommands.AzureServiceBus
             return true;
         }
 
-        public override async Task<Message[]> GetResponsesAsync(int timeWindowinMinutes)
+        public override async Task<Message[]> GetResponsesAsync()
         {
-            IReadOnlyList<ServiceBusReceivedMessage> messages = await resp_receiver.ReceiveMessagesAsync(maxMessages: 32, maxWaitTime: TimeSpan.FromMinutes(timeWindowinMinutes));
+            AzureServiceBusConnectionOptions conn = (AzureServiceBusConnectionOptions)connectionOptions;
+
+            IReadOnlyList<ServiceBusReceivedMessage> messages = await resp_receiver.ReceiveMessagesAsync(maxMessages: conn.MaxMessagesToRetrieve, maxWaitTime: conn.MaxWaitTime ?? TimeSpan.FromMinutes(1));
 
             List<Message> list = new List<Message>();
 
@@ -128,7 +133,7 @@ namespace ServerTools.ServerCommands.AzureServiceBus
 
             return list.ToArray();
         }
-        public override async Task<Message[]> GetResponsesFromDlqAsync(int timeWindowinMinutes)
+        public override async Task<Message[]> GetResponsesFromDlqAsync()
         {
 
             ServiceBusReceiver dlq_resp_receiver = client.CreateReceiver(resp_receiver.EntityPath, new ServiceBusReceiverOptions
@@ -136,8 +141,9 @@ namespace ServerTools.ServerCommands.AzureServiceBus
                 SubQueue = SubQueue.DeadLetter
             });
 
+            AzureServiceBusConnectionOptions conn = (AzureServiceBusConnectionOptions)connectionOptions;
 
-            IReadOnlyList<ServiceBusReceivedMessage> messages = await resp_receiver.ReceiveMessagesAsync(maxMessages: 32, maxWaitTime: TimeSpan.FromMinutes(timeWindowinMinutes));
+            IReadOnlyList<ServiceBusReceivedMessage> messages = await resp_receiver.ReceiveMessagesAsync(maxMessages: conn.MaxMessagesToRetrieve, maxWaitTime: conn.MaxWaitTime ?? TimeSpan.FromMinutes(1));
 
             List<Message> list = new List<Message>();
 

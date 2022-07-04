@@ -40,14 +40,14 @@ namespace ServerTools.ServerCommands
             return r;
         }
 
-        public async Task<(bool, int, List<string>)> ExecuteCommandsAsync(int timeWindowinMinutes = 1)
+        public async Task<(bool, int, List<string>)> ExecuteCommandsAsync()
         {
             //tupple return: Item1: (bool) - if all commands have been processed succesfully or not | Item2: (int) - number of commands that were processed/returned from the remote queue | Item3: (List<string>) - List of all exception messages when Item1 = false;
             var result = (true, 0, new List<string>());
 
             while (true)
             {
-                var messages = await GetCommandsAsync(timeWindowinMinutes);
+                var messages = await GetCommandsAsync();
 
                 if (messages.Length == 0) break;
 
@@ -141,14 +141,14 @@ namespace ServerTools.ServerCommands
             }
         }
 
-        public async Task<(bool, int)> HandleCommandsDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1) 
+        public async Task<(bool, int)> HandleCommandsDlqAsync(Func<Message, bool> ValidateProcessing = null) 
         {
             //tupple return: Item1: (bool) - if all commands have been processed succesfully or not | Item2: (int) - number of commands that were processed/returned from the remote queue
             var result = (true, 0);
 
             while (true)
             {
-                var messages = await GetCommandsFromDlqAsync(timeWindowinMinutes);
+                var messages = await GetCommandsFromDlqAsync();
 
                 if (messages.Length == 0) break;
 
@@ -178,8 +178,8 @@ namespace ServerTools.ServerCommands
         }
         public abstract Task<bool> PostCommandAsync(Message message);
         public abstract Task<bool> PostCommandToDlqAsync(Message message);
-        public abstract Task<Message[]> GetCommandsAsync(int timeWindowinMinutes);
-        public abstract Task<Message[]> GetCommandsFromDlqAsync(int timeWindowinMinutes);
+        public abstract Task<Message[]> GetCommandsAsync();
+        public abstract Task<Message[]> GetCommandsFromDlqAsync();
         public abstract Task DeleteCommandAsync(object message);
         public abstract Task DeleteCommandFromDlqAsync(object message);
         public abstract Task<long> GetCommandsCountAsync();
@@ -207,14 +207,14 @@ namespace ServerTools.ServerCommands
 
             return r;
         }
-        public async Task<(bool, int, List<string>)> ExecuteResponsesAsync(int timeWindowinMinutes = 1)
+        public async Task<(bool, int, List<string>)> ExecuteResponsesAsync()
         {
             //tupple return: Item1: (bool) - if all commands have been processed succesfully or not | Item2: (int) - number of commands that were processed/returned from the remote queue | Item3: (List<string>) - List of all exception messages when Item1 = false;
             var result = (true, 0, new List<string>());
 
             while (true)
             {
-                var messages = await GetResponsesAsync(timeWindowinMinutes);
+                var messages = await GetResponsesAsync();
 
                 if (messages.Length == 0) break;
 
@@ -302,13 +302,13 @@ namespace ServerTools.ServerCommands
             }
         }
 
-        public async Task<(bool, int)> HandleResponsesDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1)
+        public async Task<(bool, int)> HandleResponsesDlqAsync(Func<Message, bool> ValidateProcessing = null)
         {
             var result = (true, 0);
 
             while (true)
             {
-                var messages = await GetResponsesFromDlqAsync(timeWindowinMinutes);
+                var messages = await GetResponsesFromDlqAsync();
 
                 if (messages.Length == 0) break;
 
@@ -339,8 +339,8 @@ namespace ServerTools.ServerCommands
 
         public abstract Task<bool> PostResponseAsync(Message message);
         public abstract Task<bool> PostResponseToDlqAsync(Message message);
-        public abstract Task<Message[]> GetResponsesAsync(int timeWindowinMinutes);
-        public abstract Task<Message[]> GetResponsesFromDlqAsync(int timeWindowinMinutes);
+        public abstract Task<Message[]> GetResponsesAsync();
+        public abstract Task<Message[]> GetResponsesFromDlqAsync();
         public abstract Task DeleteResponseAsync(object message);
         public abstract Task DeleteResponseFromDlqAsync(object message);
         public abstract Task<long> GetResponsesCountAsync();

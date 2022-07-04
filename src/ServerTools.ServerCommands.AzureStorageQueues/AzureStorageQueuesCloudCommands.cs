@@ -54,9 +54,11 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
             => await _deleteMessageFromQueueAsync(qsc_responses_deadletter, message);
 
 
-        public override async Task<Message[]> GetCommandsAsync(int timeWindowinMinutes)
+        public override async Task<Message[]> GetCommandsAsync()
         {
-            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_requests.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes)));
+            AzureStorageQueuesConnectionOptions conn = (AzureStorageQueuesConnectionOptions)connectionOptions;
+
+            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_requests.ReceiveMessagesAsync(conn.MaxMessagesToRetrieve, conn.VisibilityTimeout ?? TimeSpan.FromMinutes(1)));
 
             List<Message> list = new List<Message>();
 
@@ -72,9 +74,11 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
             return list.ToArray();
         }
 
-        public override async Task<Message[]> GetCommandsFromDlqAsync(int timeWindowinMinutes)
+        public override async Task<Message[]> GetCommandsFromDlqAsync()
         {
-            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_requests_deadletter.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes)));
+            AzureStorageQueuesConnectionOptions conn = (AzureStorageQueuesConnectionOptions)connectionOptions;
+
+            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_requests_deadletter.ReceiveMessagesAsync(conn.MaxMessagesToRetrieve, conn.VisibilityTimeout ?? TimeSpan.FromMinutes(1)));
 
             List<Message> list = new List<Message>();
 
@@ -98,11 +102,13 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
         public override async Task<long> GetCommandsCountAsync() => await _getQueueCountAsync(qsc_requests);
         public override async Task<long> GetCommandsDlqCountAsync() => await _getQueueCountAsync(qsc_requests_deadletter);
 
-        public override async Task<Message[]> GetResponsesAsync(int timeWindowinMinutes = 1)
+        public override async Task<Message[]> GetResponsesAsync()
         {
             List<Message> list = new List<Message>();
 
-            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_responses.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes)));
+            AzureStorageQueuesConnectionOptions conn = (AzureStorageQueuesConnectionOptions)connectionOptions;
+
+            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_responses.ReceiveMessagesAsync(conn.MaxMessagesToRetrieve, conn.VisibilityTimeout ?? TimeSpan.FromMinutes(1)));
 
             foreach (var item in messages)
             {
@@ -115,11 +121,13 @@ namespace ServerTools.ServerCommands.AzureStorageQueues
 
             return list.ToArray();
         }
-        public override async Task<Message[]> GetResponsesFromDlqAsync(int timeWindowinMinutes = 1)
+        public override async Task<Message[]> GetResponsesFromDlqAsync()
         {
             List<Message> list = new List<Message>();
 
-            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_responses_deadletter.ReceiveMessagesAsync(32, TimeSpan.FromMinutes(timeWindowinMinutes)));
+            AzureStorageQueuesConnectionOptions conn = (AzureStorageQueuesConnectionOptions)connectionOptions;
+
+            QueueMessage[] messages = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await qsc_responses_deadletter.ReceiveMessagesAsync(conn.MaxMessagesToRetrieve, conn.VisibilityTimeout ?? TimeSpan.FromMinutes(1)));
 
             foreach (var item in messages)
             {
