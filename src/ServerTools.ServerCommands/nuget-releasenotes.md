@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.0.2] - not yet
+## [1.0.1] - not yet
 ### Added
 - Added specific package ServerTools.ServerCommands.AzureStorageQueues, that is the implementation of generic for the Azure Storage service.
 - Added specific package ServerTools.ServerCommands.AzureServiceBus, that is the implementation of generic for the Azure Service Bus service.
@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file.
 - Added a strong-types Message record that encapsulates the message details
 
 
-## [1.0.1] - not yet
+## [1.0.1]
 ### Added
 - Overloads for PostCommand() and PostResponse(), accepting Type and Type name
 ### Fixed 
