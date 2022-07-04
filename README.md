@@ -367,9 +367,9 @@ var dlq = await commands.HandleCommandsDlqAsync(HandleDlqMessage)
 
 ```
 
-If the ```Func``` parameter returns ```false```, after any custom logic and processing you decide, than the outcome is that the library will simply remove the message form the DLQ hence deleting forever (you may decide to log a message or archive the message somewhere else). If it returns ```true```, than the library falls into the Pattern 1 for that message, and posts it into the main queue, and removes it from the DLQ>
+If the ```Func``` parameter returns ```false```, after any custom logic and processing you decide, than the outcome is that the library will simply remove the message form the DLQ hence deleting forever (you may decide to log a message or archive the message somewhere else). If it returns ```true```, than the library falls into the Pattern 1 for that message, and posts it into the main queue, and removes it from the DLQ.
 
-As ou can see this option allows you to satisfy both Pattern 1 or Pattern 2, or a combination thereof.
+As you can see this option allows you to satisfy both Pattern 1 or Pattern 2, or a combination thereof.
 
 Here is the full code for this:
 
@@ -397,22 +397,6 @@ public bool HandleDlqMessage(Message m)
 
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 For more detailed documentation and more complex use cases head to the official documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If there are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=03_question.yml&title=%5BQUERY%5D) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=02_feature_request.yml&title=%5BFEATURE+REQ%5D) do not hesitate to post them there.
 
 ## Roadmap
@@ -430,7 +414,7 @@ See the [open issues](https://github.com/hgjura/ServerTools.ServerCommands/issue
   - [ ] AWS SQS
   - [ ] Apache Kafka
   - [ ] Rabbit MQ
-- [x] Enable batching, batch processing and command correlations
+- [ ] Enable batching, batch processing and command correlations
 - [ ] Enable ordering and ordered processing through sessions
 
 ## Support
