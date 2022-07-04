@@ -108,7 +108,7 @@ jobs:
           echo Version: $VERSION
           VERSION="${VERSION//v}"
           echo Clean Version: $VERSION
-          dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
+          dotnet pack --configuration Release /p:Version=1.0.1 --no-build --output .
       working-directory: ./src/${{ env.PROJECT_NAME_CORE }}/
 
     - name: Pack Release - ASQ
@@ -119,7 +119,7 @@ jobs:
           echo Version: $VERSION
           VERSION="${VERSION//v}"
           echo Clean Version: $VERSION
-          dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
+          dotnet pack --configuration Release /p:Version=1.0.1 --no-build --output .
       working-directory: ./src/${{ env.PROJECT_NAME_ASQ }}/
 
     - name: Pack Release - ASB
@@ -130,7 +130,7 @@ jobs:
           echo Version: $VERSION
           VERSION="${VERSION//v}"
           echo Clean Version: $VERSION
-          dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
+          dotnet pack --configuration Release /p:Version=1.0.1 --no-build --output .
       working-directory: ./src/${{ env.PROJECT_NAME_ASB }}/
   
     - name: Publish to GitHub PM
