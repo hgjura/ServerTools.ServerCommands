@@ -40,7 +40,6 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Setup Nuget
-      uses: actions/checkout@master
       uses: nuget/setup-nuget@v1
       with:
         nuget-api-key: ${{ secrets.NUGET_API_KEY }}
