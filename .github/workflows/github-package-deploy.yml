@@ -38,10 +38,14 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-        
-    - name: Setup NuGet
-      run: nuget.exe update -self
-      working-directory: ./
+
+      - name: Setup Nuget
+      - uses: actions/checkout@master
+      - uses: nuget/setup-nuget@v1
+        with:
+          nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+          nuget-version: '5.x'
+      - run: nuget restore ./src/${{ env.PROJECT_NAME_ASQ }}/*.sln
      
     - name: Restore dependencies
       run: dotnet restore
