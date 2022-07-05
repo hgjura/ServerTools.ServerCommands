@@ -145,5 +145,5 @@ jobs:
     - name: Publish to Nuget PM
       if: github.event_name == 'release'
       run: |
-          dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY} --skip-duplicate
+          dotnet nuget push ./**/*.nupkg --source ${NUGET_FEED}/index.json --api-key ${NUGET_API_KEY} --skip-duplicate --no-symbols
 
