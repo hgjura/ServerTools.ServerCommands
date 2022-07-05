@@ -38,12 +38,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-
-    # - name: Setup NuGet
-    #   uses: NuGet/setup-nuget@v1.0.2
-    #   with:
-    #     nuget-api-key: ${{ secrets.NUGET_API_KEY }}
-    #     nuget-version: latest
+        
+    - name: Setup NuGet
+      run: nuget.exe update -self
+      working-directory: ./
      
     - name: Restore dependencies
       run: dotnet restore
@@ -139,8 +137,8 @@ jobs:
           dotnet pack --configuration Release /p:Version=$VERSION --no-build --output .
       working-directory: ./src/${{ env.PROJECT_NAME_ASB }}/
   
-    # - name: Publish to GitHub PM
-    #   run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN} --skip-duplicate
+    - name: Publish to GitHub PM
+      run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN} --skip-duplicate
 
     - name: Publish to Nuget PM
       if: github.event_name == 'release'
