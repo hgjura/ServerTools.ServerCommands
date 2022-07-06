@@ -6,8 +6,8 @@ This library is a spcific implementation that uses [Azure Storage Queues](https:
 
 ## Implementations
 
-* [Azure Storage Queues]()
-* [Azure Service Bus]()
+* [Azure Storage Queues](https://www.nuget.org/packages/ServerTools.ServerCommands.AzureStorageQueues/)
+* [Azure Service Bus](https://www.nuget.org/packages/ServerTools.ServerCommands.AzureServiceBus/)
 * AWS SQS (coming soon)
 * RabbitMQ (coming soon)
 * Apache Kafka (coming soon)
@@ -18,17 +18,46 @@ More documentation is available at the [ServerCommands](https://github.com/hgjur
 ## How to Use
 
 To post a command:
+
 ```csharp
- var c = await new CloudCommands().InitializeAsync(new CommandContainer(), new AzureStorageQueuesConnectionOptions(Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), MaxDequeueCountForError: 3, Log: new DebugLoggerProvider().CreateLogger("default"), QueueNamePrefix: "intro"));
+var logger = new DebugLoggerProvider().CreateLogger("default");
+var prefix = "sample";
+var as_accountname = Environment.GetEnvironmentVariable["AccountName"]; //this is the account name for the Azure Storage
+var as_accountkey = Environment.GetEnvironmentVariable["AccountKey"]; //this is the account key for the Azure Storage
+
+var connection_options = new AzureStorageQueuesConnectionOptions(as_accountname, as_accountkey, MaxDequeueCountForError: 3, Log: logger, QueueNamePrefix: prefix);
+
+
+var c = await new CloudCommands().InitializeAsync(new CommandContainer(), connection_options);
 
 _ = await c.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
 //or _ = await c.PostCommandAsync(typeof(AddNumbersCommand), new { Number1 = 2, Number2 = 3 });
 
 ```
 
-To execute commands:
+To execute commands, responses or deadletter queues:
 
 ```csharp
+
+var logger = new DebugLoggerProvider().CreateLogger("default");
+
+var retry_policy = Policy
+   .Handle<Exception>()
+   .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (result, timeSpan, retryCount, context) =>
+   {
+       logger?.LogWarning($"Calling service failed [{result.Message} | {result.InnerException?.Message}]. Waiting {timeSpan} before next retry. Retry attempt {retryCount}.");
+   }); //This is your retry policy. It retries 5 times using exponential backoff. If not set, or set to null, the default is similar: it tries 3 times with exponential backoff 
+
+var prefix = "sample"; //this is the prefix that will be added to the queues created by the package
+
+var maxDequeueCountForError = 3; //this is the number of times a message will be dequeued before sent to DLQ. If not set, defaults to 5.
+var maxMessagesToRetrieve = 50; //this is the number of messages read by the queue at once.  If not set, defaults to 32.
+var as_accountname = Environment.GetEnvironmentVariable["AccountName"]; //this is the account name for the Azure Storage
+var as_accountkey = Environment.GetEnvironmentVariable["AccountKey"]; //this is the account key for the Azure Storage
+var visibilityTimeout = TimeSpan.FromSeconds(20); //this is the amount of time the message will be invisible after if dequeued. If not set, defaults to 60 seconds.
+
+var connection_options = new AzureStorageQueuesConnectionOptions(as_accountname, as_accountkey, , MaxDequeueCountForError: 3, Log: logger, RetryPolicy:retry_policy, QueueNamePrefix: prefix, MaxMessagesToRetrieve: maxMessagesToRetrieve, VisibilityTimeout: visibilityTimeout);
+
 var _container = new CommandContainer();
 
 _container
@@ -37,9 +66,9 @@ _container
    .RegisterResponse<AddNumbersCommand, AddNumbersResponse>();
 
 
-var c = await new CloudCommands().InitializeAsync(_container, new AzureStorageQueuesConnectionOptions(Environment.GetEnvironmentVariable("StorageAccounName"), Environment.GetEnvironmentVariable("StorageAccountKey"), MaxDequeueCountForError: 3, Log: new DebugLoggerProvider().CreateLogger("default"), QueueNamePrefix: "intro"));
+var c = await new CloudCommands().InitializeAsync(_container, connection_options);
 
-var result = await c.ExecuteCommandsAsync()();
+var result = await c.ExecuteCommandsAsync();
 
 //check if something was wrong or if any items were processed at all
 Assert.IsTrue(!result.Item1);
@@ -48,21 +77,25 @@ Assert.IsTrue(!result.Item1);
 Assert.IsTrue(result.Item2 > 0);
 
 //check if there was any errors
-Assert.IsTrue(result.Item3.Count > 0); //This value keeps the list of error messages that were encountered. After retrying 5 times the command is moved to the deadletterqueue.
+Assert.IsTrue(result.Item3.Count > 0); //This value keeps the list of error messages that were encountered. After retrying 3 times the command is moved to the deadletterqueue.
 
-If a command generates a response, than you also execute and responses:
+//If a command generates a response, than you also execute and responses:
 
 var responses = commands.ExecuteResponsesAsync();
 
 Assert.IsTrue(!responses.Item1);
 Assert.IsTrue(responses.Item2 > 0);
 
-
 ```
+
 
 And that's that!
 
 For more detailed documentation and more complex use cases head to the offical documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If there are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=hgjura&labels=question&title=ask%3A+) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=hgjura&labels=request&title=newfeature%3A+) do not hesitate to post them there.
+
+## How to create your own implementation
+
+To create your own implementation of this functionality, using your own messaging service or storage, go to the base package [Server.ServerCommands]() and follow the instructions there. 
 
 
 ## Key Features

@@ -167,7 +167,7 @@ namespace ServerTools.ServerCommands
         }
         public CommandContainer Use<T>(T instance)
         {
-            c.UseInstance(instance);
+            c.Use(instance);
 
             return this;
         }

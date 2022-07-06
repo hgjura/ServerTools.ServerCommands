@@ -140,7 +140,8 @@ jobs:
       working-directory: ./src/${{ env.PROJECT_NAME_ASB }}/
   
     - name: Publish to GitHub PM
-      run: dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN} --skip-duplicate
+      run: |
+          dotnet nuget push ./**/*.nupkg --source ${GITHUB_FEED}/index.json --api-key ${GITHUB_TOKEN} --skip-duplicate
 
     - name: Publish to Nuget PM
       if: github.event_name == 'release'

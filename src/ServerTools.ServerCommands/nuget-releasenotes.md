@@ -1,7 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.0.1] - not yet
+## [1.0.4] - 2022/07/06
+### Added
+- Updated documentation
+- You can register a response from the RegisterCommand. For ex., .RegisterCommand<AddNumbersCommand, AddNumbersResponse>()
+
+
+## [1.0.3] - 2022/07/05
+### Changed
+- Updated documentation
+- Updated underlying packages
+
+## [1.0.2] - 2022/07/05
 ### Added
 - Added specific package ServerTools.ServerCommands.AzureStorageQueues, that is the implementation of generic for the Azure Storage service.
 - Added specific package ServerTools.ServerCommands.AzureServiceBus, that is the implementation of generic for the Azure Service Bus service.
