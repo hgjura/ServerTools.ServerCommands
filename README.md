@@ -68,8 +68,8 @@ Each platform/service comes with its pros and cons. By no means they are a major
 
 ## Implementations
 
-* [Azure Storage Queues]()
-* [Azure Service Bus]()
+* [Azure Storage Queues](https://www.nuget.org/packages/ServerTools.ServerCommands.AzureStorageQueues/)
+* [Azure Service Bus](https://www.nuget.org/packages/ServerTools.ServerCommands.AzureServiceBus/)
 * AWS SQS (coming soon)
 * RabbitMQ (coming soon)
 * Apache Kafka (coming soon)
@@ -96,8 +96,8 @@ Add the [NuGet package](https://www.nuget.org/packages/ServerTools.ServerCommand
 * In Visual Studio - Tools > NuGet Package Manager > Manage Packages for Solution
 * Select the Browse tab, search for ServerCommands
 * Select one of the following libraries:
-* * [ServerTools.ServerCommands.AzureStorageQueues]()
-* * [ServerTools.ServerCommands.AzureServiceBus]()
+* * [ServerTools.ServerCommands.AzureStorageQueues](https://www.nuget.org/packages/ServerTools.ServerCommands.AzureStorageQueues/)
+* * [ServerTools.ServerCommands.AzureServiceBus](https://www.nuget.org/packages/ServerTools.ServerCommands.AzureServiceBus/)
 * Install into each project within your solution
 
 ## Usage
@@ -122,9 +122,9 @@ See example:
 ```csharp
 public class AddNumbersCommand : IRemoteCommand
 {
-    public bool RequiresResponse => false;
+    public bool RequiresResponse => true;
 
-    public async Task<(bool, Exception, dynamic, dynamic)> ExecuteAsync(dynamic command, CommandMetadata meta)
+    public async Task<(bool, Exception, dynamic, CommandMetadata)> ExecuteAsync(dynamic command, CommandMetadata meta)
     {
     // must handle exceptions
         try
@@ -134,12 +134,12 @@ public class AddNumbersCommand : IRemoteCommand
 
             int result = n1 + n2;
       
-            // set the first item to true indicating success, set the rest to null
+            // set the first item to true indicating success, set the 2nd to null. If this returns a Response, the third parameter would be a Response object. Forth parameter is the metadata object that is returned back.
             return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, new { Result = result, Message = "Ok." }, meta));
         }
         catch (Exception ex)
         {
-            // set the first item to false indicating failure, set second items to the Exception thrown, set the rest to null
+            // set the first item to false indicating failure, set second items to the Exception thrown. Third is null. Fourth parameter is the metadata object that is returned back.
             return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((false, ex, null, meta));
         }
     }

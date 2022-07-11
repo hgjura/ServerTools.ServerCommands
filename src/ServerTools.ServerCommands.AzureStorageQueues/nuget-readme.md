@@ -95,7 +95,7 @@ For more detailed documentation and more complex use cases head to the offical d
 
 ## How to create your own implementation
 
-To create your own implementation of this functionality, using your own messaging service or storage, go to the base package [Server.ServerCommands]() and follow the instructions there. 
+To create your own implementation of this functionality, using your own messaging service or storage, go to the base package [Server.ServerCommands](https://www.nuget.org/packages/ServerTools.ServerCommands/) and follow the instructions there. 
 
 
 ## Key Features
@@ -106,7 +106,7 @@ To create your own implementation of this functionality, using your own messagin
 * Batching and correlation of commands
 * Commands with remote response execution
 * High performance
-* Supports .NET 5.0+
+* Supports .NET 6.0+
 
 ## Related Packages
 

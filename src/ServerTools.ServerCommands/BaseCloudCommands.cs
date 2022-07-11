@@ -16,11 +16,11 @@ namespace ServerTools.ServerCommands
 
         public async Task<bool> PostCommandAsync<T>(dynamic CommandContext, CommandMetadata PreviousMatadata = new())
         {
-            return await PostCommandAsync(typeof(T).Name, CommandContext);
+            return await PostCommandAsync(typeof(T).Name, CommandContext, PreviousMatadata);
         }
         public async Task<bool> PostCommandAsync(Type type, dynamic CommandContext, CommandMetadata PreviousMatadata = new())
         {
-            return await PostCommandAsync(type.Name, CommandContext);
+            return await PostCommandAsync(type.Name, CommandContext, PreviousMatadata);
         }
         public async Task<bool> PostCommandAsync(string type_name, dynamic CommandContext, CommandMetadata PreviousMatadata = new ())
         {
@@ -28,7 +28,7 @@ namespace ServerTools.ServerCommands
             commandBody.CommandContext = new ExpandoObject() as dynamic;         
             commandBody.CommandContext = CommandContext;
 
-            var meta = new CommandMetadata();
+            var meta = PreviousMatadata;
 
             if (PreviousMatadata.UniqueId == null)
                 meta.CommandStartNew(type_name);
@@ -40,7 +40,7 @@ namespace ServerTools.ServerCommands
             return r;
         }
 
-        public async Task<(bool, int, List<string>)> ExecuteCommandsAsync()
+        public virtual async Task<(bool, int, List<string>)> ExecuteCommandsAsync()
         {
             //tupple return: Item1: (bool) - if all commands have been processed succesfully or not | Item2: (int) - number of commands that were processed/returned from the remote queue | Item3: (List<string>) - List of all exception messages when Item1 = false;
             var result = (true, 0, new List<string>());
@@ -55,38 +55,12 @@ namespace ServerTools.ServerCommands
 
                 foreach (var m in messages)
                 {
-                    var meta = m.Metadata;
+                    var r = await ExecuteCommandMessage(m);
 
-                    meta.CommandExeuted();
-
-                    var b = await _ProcessCommands(m.Text, meta, connectionOptions.Log);
-
-                    if (b.Item1)
-                    {                        
-                        await DeleteCommandAsync(m.OriginalMessage);
-                    }
-                    else
+                    if (!r.Item1)
                     {
-                        meta.CommandFailed();
-
                         result.Item1 = false;
-                        result.Item3.Add($"{m.Id}:{b.Item2?.Message}:{b.Item2?.InnerException?.Message}");
-
-                        connectionOptions.Log?.LogError(b.Item2?.Message);
-                        connectionOptions.Log?.LogWarning($"Message could not be processed: [{connectionOptions.CommandQueueName ?? "unknown" }] {m.Text}");
-
-                        if (m.DequeueCount > connectionOptions.MaxDequeueCountForError)
-                        {
-                            connectionOptions.Log?.LogWarning($"Message {m.Id} will be moved to dead letter queue.");
-
-                            meta.CommandSentToDlq(b.Item2);
-
-                            var commandDLQBody = new ExpandoObject() as dynamic;
-                            commandDLQBody.OriginalCommandContext = new ExpandoObject() as dynamic;
-                            commandDLQBody.OriginalCommandContext = JsonConvert.DeserializeObject<ExpandoObject>(m.Text);
-
-                            var r = await PostCommandToDlqAsync(new Message(meta.CommandDeadletterQueueUniqueId.ToString(), JsonConvert.SerializeObject(commandDLQBody), 0, meta.CommandDeadletterQueueRetryCount, meta, m.OriginalMessage));
-                        }
+                        result.Item3.Add(r.Item2);
                     }
                 }
 
@@ -96,6 +70,43 @@ namespace ServerTools.ServerCommands
 
             return result;
         }
+        protected async Task<(bool, string)> ExecuteCommandMessage(Message m)
+        {
+            var meta = m.Metadata;
+
+            meta.CommandExeuted();
+
+            var b = await _ProcessCommands(m.Text, meta, connectionOptions.Log);
+
+            if (b.Item1)
+            {
+                await DeleteCommandAsync(m.OriginalMessage);
+                return (true, "");
+            }
+            else
+            {
+                meta.CommandFailed();
+
+                connectionOptions.Log?.LogError(b.Item2?.Message);
+                connectionOptions.Log?.LogWarning($"Message could not be processed: [{connectionOptions.CommandQueueName ?? "unknown"}] {m.Text}");
+
+                if (m.DequeueCount > connectionOptions.MaxDequeueCountForError)
+                {
+                    connectionOptions.Log?.LogWarning($"Message {m.Id} will be moved to dead letter queue.");
+
+                    meta.CommandSentToDlq(b.Item2);
+
+                    var commandDLQBody = new ExpandoObject() as dynamic;
+                    commandDLQBody.OriginalCommandContext = new ExpandoObject() as dynamic;
+                    commandDLQBody.OriginalCommandContext = JsonConvert.DeserializeObject<ExpandoObject>(m.Text);
+
+                    var r = await PostCommandToDlqAsync(new Message(meta.CommandDeadletterQueueUniqueId.ToString(), JsonConvert.SerializeObject(commandDLQBody), 0, meta.CommandDeadletterQueueRetryCount, meta, m.OriginalMessage));
+                }
+
+                return (false, $"{m.Id}:{b.Item2?.Message}:{b.Item2?.InnerException?.Message}");
+            }
+        }
+
         private async Task<(bool, Exception, dynamic, CommandMetadata)> _ProcessCommands(string commandBody, CommandMetadata metadata, ILogger log)
         {
             try

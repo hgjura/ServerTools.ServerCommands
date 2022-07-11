@@ -37,7 +37,7 @@ namespace ServerTools.ServerCommands.Tests
 
             _container = new CommandContainer();
             _queueNamePrefix = nameof(UnitTestsForServerCommands).ToLower();
-            commands = await new AzureServiceBus.CloudCommands().InitializeAsync(_container, new AzureServiceBusConnectionOptions(Configuration["ASBConnectionString"], 3, logger, QueueNamePrefix: _queueNamePrefix));
+            commands = await new AzureServiceBus.CloudCommands().InitializeAsync(_container, new AzureServiceBusConnectionOptions(Configuration["ASBConnectionString"], AzureServiceBusTier.Basic, 3, logger, QueueNamePrefix: _queueNamePrefix));
         }
 
         [ClassCleanup()]
