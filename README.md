@@ -397,6 +397,113 @@ public bool HandleDlqMessage(Message m)
 
 ```
 
+### Process commands in order
+
+> **This applies only to the Azure Service Bus library, [ServerTools.ServerCommands.AzureServiceBus](https://www.nuget.org/packages/ServerTools.ServerCommands.AzureServiceBus/). Other libraries do not support this functionality.**
+
+Let us look at how we can accomplish this in the Azure Service Bus library. 
+
+Te begin with here are some notes about this functioanlity.
+* In general, features like ordering are not realy supported in messaging architectures. It goes against the concepts of maximum asynchronicity and maximum scalability, on which arhcitectures are build. Most cloud sevices, do not support this. Azure Service Bus, also does not natively support it. However, creative developers have come with ways to enable this. This is one of those implementations.
+* Though, this may look like a rock-solid turnkey solution, it is not. It uses a feature of the Azure Service Bus, session state, that is meant for something else, to make this happen. 
+* It is meant for small ordered sets. So for example an ecommerce order, the requires the order items to be processed in the way they were enetered in a shopping cart, would fit the ideal scenario. An IoT set of signals, send by a device in a timeseries fashion, that could go into the millions it is not a good candiadate. The amount of precossing of such series would eventually overwhelm the service.
+
+This feature is based on the Session feature of the Azure Service Bus service. Hence, you will need to create the queue in the Standart or Premier tier. The Basic tier will not work. Look carefully on the sample below on how the queue initial configuration is made and all its options. If you had created a queue prior, in the Basic tier, running the ```InitializeAsync()``` with the Standard flag will not chnage that queue. InitializeAsync will simple check if the queue with that name exists and skipt it. So you will need to drop the queueu manually and recreate it.
+
+As mentioned, the feature uses Session to be implemented, more specifically Session State. Each Session in Azure Service Bus has a State that lives as long as that Session lives. Th library expect the commands to be passed with some extra flags: ```SessionId```, ```Order```, and ```IsLast```. ```SessionId``` is a ```Guid``` type and is as the name implies the session id of the session. This will be the identifies that the service uses for the session state. ```Order``` is an ```integer``` and hold the order in which the command should be executed. It starts with 1. ```IsLast``` is the flag that indicates that this command is the last in the set, and instructs the library to complete the execution of the order set and close the session and its state. Otherwise the library will instruct the Azure Service Bus service to keep the Session and its State open forever.
+
+For example, a shopping cart order set that has 10 items in it, would have these as parameters: ```SessionId``` would be the same for each command, a guid that you create and you hold on to until all items/commands for that order set have been posted. ```Order``` would be from 1 to 10. And, ```IsLast``` would be ```false``` for items 1-9. The default value for this is ```false``` so you dont have to pass this specifically if that is the case. And, it should be set to ```true``` for item number 10.
+
+Instead of the ```PostOrderedCommandAsync``` method of the library you call the ```PostOrderedCommandAsync``` with the appropriate parameters. 
+
+All other instractions are the same as before.
+
+Here is an example on how you can integrate this in your code.
+
+
+```cs
+try
+{
+
+    var _container = new CommandContainer();
+
+    _container.RegisterCommand<AddNumbersCommand, AddNumbersResponse>();
+
+    //need to cast from IServerCommand to the actual AzureServiceBus.CloudCommaands, 
+    //since the ICommand does not have the PostOrderedCommandAsync() (yet), but the implementation of the Service Bus library has it
+    var c = (ServerTools.ServerCommands.AzureServiceBus.CloudCommands) await new ServerTools.ServerCommands.AzureServiceBus.CloudCommands()
+            .InitializeAsync(_container, 
+                new AzureServiceBusConnectionOptions(
+                  Configuration["ASBConnectionString"], 
+                  AzureServiceBusTier.Standard, 
+                  3, 
+                  logger, 
+                  DefaultMessageTimeToLive: TimeSpan.FromMinutes(2), 
+                  QueueNamePrefix: _queueNamePrefix, 
+                  MaxWaitTime: TimeSpan.FromSeconds(10), 
+                  RequiresSession: true));
+
+
+    var session1 = Guid.NewGuid();
+    var session2 = Guid.NewGuid();
+
+    _ = await c.PostOrderedCommandAsync<AddNumbersCommand>(new { Number1 = 4, Number2 = 0 }, session1, 4, false);
+    _ = await c.PostOrderedCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 0 }, session1, 2, false);
+    _ = await c.PostOrderedCommandAsync<AddNumbersCommand>(new { Number1 = 3, Number2 = 0 }, session1, 3, false);
+    _ = await c.PostOrderedCommandAsync<AddNumbersCommand>(new { Number1 = 5, Number2 = 0 }, session1, 5, true);
+    _ = await c.PostOrderedCommandAsync<AddNumbersCommand>(new { Number1 = 1, Number2 = 0 }, session1, 1, false);
+
+    _ = await c.PostOrderedCommandAsync<AddNumbersCommand>(new { Number1 = 4, Number2 = 0 }, session2, 4);
+    _ = await c.PostOrderedCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 0 }, session2, 2);
+    _ = await c.PostOrderedCommandAsync<AddNumbersCommand>(new { Number1 = 3, Number2 = 0 }, session2, 3);
+    _ = await c.PostOrderedCommandAsync<AddNumbersCommand>(new { Number1 = 5, Number2 = 0 }, session2, 5, true);
+    _ = await c.PostOrderedCommandAsync<AddNumbersCommand>(new { Number1 = 1, Number2 = 0 }, session2, 1);
+
+
+    var result = await c.ExecuteCommandsAsync();
+    var result2 = await c.ExecuteResponsesAsync();
+
+    Assert.IsTrue(result.Item1);
+    Assert.IsTrue(result.Item2 == 10);
+    Assert.IsTrue(result.Item3.Count == 0);
+
+    Assert.IsTrue(result2.Item1);
+    Assert.IsTrue(result2.Item2 == 10);
+    Assert.IsTrue(result2.Item3.Count == 0);
+}
+catch (Exception ex)
+{
+    throw;
+}
+``` 
+
+And that is it!
+
+> Aside from the fragility this functionality has with large numbers, here are a few others that I have noticed this does not respond well.
+* <b>Missing orders.</b> So let say the order set of commands you are posting has a missing element. For example, you wer supposed to send 5 commands in the order of 1 to 5 with, 5 being last. But you actually posted, 4, 3, 5 (last), 1. Command in order 2 is missing! So what is the library to do !?!? It executes command with order 1, but it cannot execute commands 3,4,5 because it is alway waiting for command 2. This is how you solve this.
+  - These non-executable commands will sit there in limbo (in the Deferred list of the Azure Service Bus queue) until their expiratiion. And than they will go into the deadletter queue.  
+  - Actually they will be invisible forever, until you call the ```HandleCommandsDlqAsync``` and than they will immediately show up in the deadletter queue and then processed. This seesm like a bug of teh Service Bus, though the product team calls it a feature.
+  - During the call of ```HandleCommandsDlqAsync``` you have the option to decide what to do with these partail orders. 
+  - Note that if you call the ```HandleCommandsDlqAsync``` without passing a callback function, you simply putting these commads back in the main queue. Which in this context does not make much sense, since they cannot be executed as they are missing the previous item on the set. They will end up back in the dead letter queue, and will do that a few times and then be deleted forever.
+  - In this case you would call ```HandleCommandsDlqAsync(HandleDlqMessageForPartialOrders)``` where ```HandleDlqMessageForPartialOrders``` is your own function, of this signature ```bool HandleDlqMessageForPartialOrders(Message m)```, where you can decide what to do with such commands, you can decide to execute them regradless, you can archive them, log them somewher, etc. 
+  - Note that ```HandleDlqMessageForPartialOrders``` needs to return a ```bool``` after it runs. Value of ```false``` means that the message that is passed as parameter goes once more in th main queue, and ```true``` means the message is removed from the queue an dno further processing will occur.
+* <b>Missing last.</b> Another scenario is that of when you forget to pass the last item with the ```IsLast = true``` parameter.
+  - The library will process the items in order, but I am not sure how the service will behave if the library cannot clear the sessions and session states.
+  - This may cause an issue over time, if all all orders have the missing ```IsLast``` parameter, and there is a large volume of them.
+  - Let say, this is for you to find out!  
+
+
+
+
+
+
+
+
+
+
+
+
+
 For more detailed documentation and more complex use cases head to the official documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If there are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=03_question.yml&title=%5BQUERY%5D) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=&labels=&template=02_feature_request.yml&title=%5BFEATURE+REQ%5D) do not hesitate to post them there.
 
 ## Roadmap

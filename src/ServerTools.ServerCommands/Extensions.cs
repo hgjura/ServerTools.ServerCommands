@@ -31,6 +31,7 @@ namespace ServerTools.ServerCommands
             s.UniqueId = Guid.NewGuid();
             s.CommandType = CommandType;
             s.CommandPostedOn = DateTime.UtcNow;
+            s.CustomMetadata = new Dictionary<string, object>();
         }
 
         public static void CommandExeuted(this ref CommandMetadata s)

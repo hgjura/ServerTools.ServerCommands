@@ -21,5 +21,36 @@ namespace ServerTools.ServerCommands.AzureServiceBus
                 throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, StringResponses.InvalidResourceName, AzureServiceBusStringResponses.Queue, queueName));
             }
         }
+
+        public static void ValidateTierAutoDeleteOnIdle(AzureServiceBusTier Tier, TimeSpan AutoDeleteOnIdle)
+        {
+            if (Tier == AzureServiceBusTier.Basic && AutoDeleteOnIdle != default)
+            {
+                throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, AzureServiceBusStringResponses.TierBasicCannotHaveThisFeature, "AutoDeleteOnIdle"));
+            }
+        }
+
+        public static void ValidateTierRequiresSession(AzureServiceBusTier Tier, bool RequiresSession)
+        {
+            if (Tier == AzureServiceBusTier.Basic && RequiresSession)
+            {
+                throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, AzureServiceBusStringResponses.TierBasicCannotHaveThisFeature, "RequiresSession"));
+            }
+        }
+        public static void ValidateTierRequiresDuplicateDetection(AzureServiceBusTier Tier, bool RequiresDuplicateDetection)
+        {
+            if (Tier == AzureServiceBusTier.Basic && RequiresDuplicateDetection)
+            {
+                throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, AzureServiceBusStringResponses.TierBasicCannotHaveThisFeature, "RequiresDuplicateDetection"));
+            }
+        }
+
+        public static void ValidateOrderedMessageFeature(bool RequiresSession)
+        {
+            if (!RequiresSession)
+            {
+                throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, AzureServiceBusStringResponses.FeatureNotSupportedWhenSessionIsOff, "OrderedMessage"));
+            }
+        }
     }
 }

@@ -51,7 +51,7 @@ namespace ServerTools.ServerCommands
 
                 if (messages.Length == 0) break;
 
-                result.Item2 = messages.Length;
+                result.Item2 += messages.Length;
 
                 foreach (var m in messages)
                 {
@@ -100,7 +100,7 @@ namespace ServerTools.ServerCommands
                     commandDLQBody.OriginalCommandContext = new ExpandoObject() as dynamic;
                     commandDLQBody.OriginalCommandContext = JsonConvert.DeserializeObject<ExpandoObject>(m.Text);
 
-                    var r = await PostCommandToDlqAsync(new Message(meta.CommandDeadletterQueueUniqueId.ToString(), JsonConvert.SerializeObject(commandDLQBody), 0, meta.CommandDeadletterQueueRetryCount, meta, m.OriginalMessage));
+                    _ = await PostCommandToDlqAsync(new Message(meta.CommandDeadletterQueueUniqueId.ToString(), JsonConvert.SerializeObject(commandDLQBody), 0, meta.CommandDeadletterQueueRetryCount, meta, m.OriginalMessage));
                 }
 
                 return (false, $"{m.Id}:{b.Item2?.Message}:{b.Item2?.InnerException?.Message}");
@@ -152,7 +152,7 @@ namespace ServerTools.ServerCommands
             }
         }
 
-        public async Task<(bool, int)> HandleCommandsDlqAsync(Func<Message, bool> ValidateProcessing = null) 
+        public virtual async Task<(bool, int)> HandleCommandsDlqAsync(Func<Message, bool> ValidateProcessing = null) 
         {
             //tupple return: Item1: (bool) - if all commands have been processed succesfully or not | Item2: (int) - number of commands that were processed/returned from the remote queue
             var result = (true, 0);
@@ -181,9 +181,12 @@ namespace ServerTools.ServerCommands
                     }
                 }
 
-                var count = await GetCommandsDlqCountAsync();
-                connectionOptions.Log?.LogWarning($"DLQ: [{connectionOptions.CommandQueueName ?? "unknown"}] {count} messages left in queue.");
+                //var count = await GetCommandsDlqCountAsync();
+                //connectionOptions.Log?.LogWarning($"DLQ: [{connectionOptions.CommandQueueName ?? "unknown"}] {count} messages left in queue.");
             }
+
+            var count = await GetCommandsDlqCountAsync();
+            connectionOptions.Log?.LogWarning($"DLQ: [{connectionOptions.CommandQueueName ?? "unknown"}] {count} messages left in queue.");
 
             return result;
         }
@@ -218,7 +221,7 @@ namespace ServerTools.ServerCommands
 
             return r;
         }
-        public async Task<(bool, int, List<string>)> ExecuteResponsesAsync()
+        public virtual async Task<(bool, int, List<string>)> ExecuteResponsesAsync()
         {
             //tupple return: Item1: (bool) - if all commands have been processed succesfully or not | Item2: (int) - number of commands that were processed/returned from the remote queue | Item3: (List<string>) - List of all exception messages when Item1 = false;
             var result = (true, 0, new List<string>());
@@ -229,52 +232,61 @@ namespace ServerTools.ServerCommands
 
                 if (messages.Length == 0) break;
 
-                result.Item2 = messages.Length;
+                result.Item2 += messages.Length;
 
                 foreach (var m in messages)
                 {
-                    var meta = m.Metadata;
+                    var r = await ExecuteCommandMessage(m);
 
-                    meta.ResponseExeuted();
-
-                    var b = await _ProcessResponses(m.Text, meta, connectionOptions.Log);
-
-                    if (b.Item1)
+                    if (!r.Item1)
                     {
-                        await DeleteResponseAsync(m.OriginalMessage);
-                    }
-                    else
-                    {
-                        meta.ResponseFailed();
-
                         result.Item1 = false;
-                        result.Item3.Add($"{m.Id}:{b.Item2?.Message}:{b.Item2?.InnerException?.Message}");
-
-                        connectionOptions.Log?.LogError(b.Item2?.Message);
-                        connectionOptions.Log?.LogWarning($"Message could not be processed: [{connectionOptions.ResponseQueueName ?? "unknown"}] {m.Text}");
-
-                        if (m.DequeueCount > connectionOptions.MaxDequeueCountForError)
-                        {
-                            connectionOptions.Log?.LogWarning($"Message {m.Id} will be moved to dead letter queue.");
-
-                            meta.ResponseSentToDlq(b.Item2);
-
-                            var responseDLQBody = new ExpandoObject() as dynamic;
-                            responseDLQBody.OriginalResponseContext = new ExpandoObject() as dynamic;
-                            responseDLQBody.OriginalResponseContext = JsonConvert.DeserializeObject<ExpandoObject>(m.Text);
-
-                            _ = await PostResponseToDlqAsync(new Message(meta.ResponseDeadletterQueueUniqueId.ToString(), JsonConvert.SerializeObject(responseDLQBody), 0, meta.ResponseDeadletterQueueRetryCount, meta, m.OriginalMessage));
-
-                        }
+                        result.Item3.Add(r.Item2);
                     }
                 }
 
                 var count = await GetResponsesCountAsync();
-
                 connectionOptions.Log?.LogWarning($"[{connectionOptions.ResponseQueueName ?? "unknown"}] {count} messages left in queue.");
             }
 
             return result;
+        }
+
+        protected async Task<(bool, string)> ExecuteResponseMessage(Message m)
+        {
+            var meta = m.Metadata;
+
+            meta.ResponseExeuted();
+
+            var b = await _ProcessResponses(m.Text, meta, connectionOptions.Log);
+
+            if (b.Item1)
+            {
+                await DeleteResponseAsync(m.OriginalMessage);
+                return (true, "");
+            }
+            else
+            {
+                meta.ResponseFailed();
+
+                connectionOptions.Log?.LogError(b.Item2?.Message);
+                connectionOptions.Log?.LogWarning($"Message could not be processed: [{connectionOptions.ResponseQueueName ?? "unknown"}] {m.Text}");
+
+                if (m.DequeueCount > connectionOptions.MaxDequeueCountForError)
+                {
+                    connectionOptions.Log?.LogWarning($"Message {m.Id} will be moved to dead letter queue.");
+
+                    meta.ResponseSentToDlq(b.Item2);
+
+                    var responseDLQBody = new ExpandoObject() as dynamic;
+                    responseDLQBody.OriginalResponseContext = new ExpandoObject() as dynamic;
+                    responseDLQBody.OriginalResponseContext = JsonConvert.DeserializeObject<ExpandoObject>(m.Text);
+
+                    _ = await PostResponseToDlqAsync(new Message(meta.ResponseDeadletterQueueUniqueId.ToString(), JsonConvert.SerializeObject(responseDLQBody), 0, meta.ResponseDeadletterQueueRetryCount, meta, m.OriginalMessage));
+                }
+
+                return (false, $"{m.Id}:{b.Item2?.Message}:{b.Item2?.InnerException?.Message}");
+            }
         }
 
         private async Task<(bool, Exception, CommandMetadata)> _ProcessResponses(string responseBody, CommandMetadata metadata, ILogger log)
@@ -313,7 +325,7 @@ namespace ServerTools.ServerCommands
             }
         }
 
-        public async Task<(bool, int)> HandleResponsesDlqAsync(Func<Message, bool> ValidateProcessing = null)
+        public virtual async Task<(bool, int)> HandleResponsesDlqAsync(Func<Message, bool> ValidateProcessing = null)
         {
             var result = (true, 0);
 

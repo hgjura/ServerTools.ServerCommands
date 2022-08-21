@@ -38,6 +38,8 @@ namespace ServerTools.ServerCommands
         public int BatchOrderId;
         public bool BatchIsLast;
 
-        public Dictionary<string, object> CustomMetadata => new Dictionary<string, object>();
+        public Dictionary<string, object> CustomMetadata;
+
+        
     }
 }

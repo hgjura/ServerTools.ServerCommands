@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2022/08/21
+### Added
+- Execute commands in a specific order (only in Azure Service Bus library)
+- Updated documentation
+
 ## [1.0.4] - 2022/07/06
 ### Added
 - Updated documentation

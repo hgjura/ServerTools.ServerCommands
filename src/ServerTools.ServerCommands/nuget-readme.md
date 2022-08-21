@@ -1,4 +1,5 @@
-﻿## About
+﻿
+## About
 
 ServerCommands facilitates running of units of code or commands remotely. It incorporates principles of messaging architectures used by most messaging tools and frameworks, like [Azure Service Bus](https://docs.microsoft.com/en-ca/azure/service-bus-messaging/), [AWS SQS](https://aws.amazon.com/sqs/), [RabbitMQ](https://www.rabbitmq.com/), or [Azure Storage Queues](https://docs.microsoft.com/en-ca/azure/storage/queues/storage-dotnet-how-to-use-queues?tabs=dotnet), [Apache Kafka](https://kafka.apache.org/) without any of the knowledge and configuration expertise to manage such installations and configurations. 
 
@@ -6,7 +7,7 @@ This library (ServerTools.ServerCommands ) is the core library that is used by a
 
 In itself this library does not provide any specific functionality, unless you want to extend from it and create your own implementations of any services that are not listed below.
 
-## Implementations
+## FOR SPECIFIC VERSIONS OF THIS GO HERE:
 
 * [Azure Storage Queues](https://www.nuget.org/packages/ServerTools.ServerCommands.AzureStorageQueues/)
 * [Azure Service Bus](https://www.nuget.org/packages/ServerTools.ServerCommands.AzureServiceBus/)
@@ -14,8 +15,8 @@ In itself this library does not provide any specific functionality, unless you w
 * RabbitMQ (coming soon)
 * Apache Kafka (coming soon)
 
+## MORE INFO AND HOW TO USE:
 More documentation is available at the [ServerCommands](https://github.com/hgjura/ServerTools.ServerCommands).
-
 
 ## How to extend this library and create your own implementation
 
@@ -31,19 +32,19 @@ Note: Create a parameterless empty constructor, and do not add anything to the c
 
 - Create command functionality
 1) Need to implement the following self-explanatory methods that posts, executes commands and handle the deadletter queue..
-```PostCommandAsync<T>(dynamic CommandContext, CommandMetadata PreviousMatadata = new())```, 
-```PostCommandAsync(Type type, dynamic CommandContext, CommandMetadata PreviousMatadata = new())```, 
-```PostCommandAsync(string type_name, dynamic CommandContext, CommandMetadata PreviousMatadata = new())```, 
-````PostCommandAsync(Message message)```.
-```ExecuteCommandsAsync(int timeWindowinMinutes = 1)```, 
-```HandleCommandsDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1)```.
+* ```PostCommandAsync<T>(dynamic CommandContext, CommandMetadata PreviousMatadata = new())```, 
+* ```PostCommandAsync(Type type, dynamic CommandContext, CommandMetadata PreviousMatadata = new())```, 
+* ```PostCommandAsync(string type_name, dynamic CommandContext, CommandMetadata PreviousMatadata = new())```, 
+* ```PostCommandAsync(Message message)```.
+* ```ExecuteCommandsAsync(int timeWindowinMinutes = 1)```, 
+* ```HandleCommandsDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1)```.
 
 - Create response functionality
 1) Need to implement the following self-explenatory methods that posts, executes responses and handle the deadletter queue.
-```PostResponseAsync<T>(dynamic ResponseContext, CommandMetadata OriginalCommandMetadata)```, 
-```PostResponseAsync(Type ResponseType, dynamic ResponseContext, CommandMetadata OriginalCommandMetadata)```, 
-```ExecuteResponsesAsync(int timeWindowinMinutes = 1)```, 
-```HandleResponsesDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1)```.
+* ```PostResponseAsync<T>(dynamic ResponseContext, CommandMetadata OriginalCommandMetadata)```, 
+* ```PostResponseAsync(Type ResponseType, dynamic ResponseContext, CommandMetadata OriginalCommandMetadata)```, 
+* ```ExecuteResponsesAsync(int timeWindowinMinutes = 1)```, 
+* ```HandleResponsesDlqAsync(Func<Message, bool> ValidateProcessing = null, int timeWindowinMinutes = 1)```.
 
 
 ## Key Features

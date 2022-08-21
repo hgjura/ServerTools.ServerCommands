@@ -95,8 +95,8 @@ namespace ServerTools.ServerCommands.Tests
                 int result = n1 + n2;
 
                 logger.LogInformation($"<< {n1} + {n2} = {n1 + n2} >>");
-                //return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, new { Result = result, Message = "Ok." }, meta));
-                return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, null, meta));
+                return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, new { Result = result, Message = "Ok." }, meta));
+                //return await Task.FromResult<(bool, Exception, dynamic, CommandMetadata)>((true, null, null, meta));
 
 
             }
