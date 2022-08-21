@@ -92,8 +92,6 @@ And that's that!
 
 For more detailed documentation and more complex use cases head to the offical documentation at [the GitHub repo](https://github.com/hgjura/ServerTools.ServerCommands). If there are [questions](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=hgjura&labels=question&title=ask%3A+) or [request new feautures](https://github.com/hgjura/ServerTools.ServerCommands/issues/new?assignees=hgjura&labels=request&title=newfeature%3A+) do not hesitate to post them there.
 
-> With this library you can send and receive commands in a certain order. Read about it [here](https://github.com/hgjura/ServerTools.ServerCommands).
-
 ## How to create your own implementation
 
 To create your own implementation of this functionality, using your own messaging service or storage, go to the base package [Server.ServerCommands](https://www.nuget.org/packages/ServerTools.ServerCommands/) and follow the instructions there. 
