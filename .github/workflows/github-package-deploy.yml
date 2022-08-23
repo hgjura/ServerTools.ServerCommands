@@ -81,9 +81,18 @@ jobs:
       run: |
           VER=${{ steps.latest-release.outputs.release }}
           VER="${VER//v}"
-          IFS=. read -r a b c <<< "$VER"
-          echo Next Version: "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
-          dotnet pack --configuration Release /p:Version="$a.$b.$((c+1))"-${GITHUB_RUN_ID} --no-build --output .
+                    
+          if [ $(echo $VER | grep -o "," | wc -l) = 3 ]; then
+            echo "Major version"
+            IFS=. read -r a b c <<< "$VER"
+            echo Next Version: "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
+            dotnet pack --configuration Release /p:Version="$a.$b.$((c+1))"-${GITHUB_RUN_ID} --no-build --output .
+          else
+            echo "Minor version"
+            IFS=. read -r a b c d <<< "$VER"
+            echo Next Version: "$a.$b.$c.$((c+1))"-${GITHUB_RUN_ID}
+            dotnet pack --configuration Release /p:Version="$a.$b.$c.$((c+1))"-${GITHUB_RUN_ID} --no-build --output .
+          fi
       working-directory: ./src/${{ env.PROJECT_NAME_CORE }}/
 
     - name: Pack CI ASQ
