@@ -83,7 +83,7 @@ jobs:
           VER=${{ steps.latest-release.outputs.release }}
           VER="${VER//v}"
                     
-          if [ $(echo $VER | grep -o "," | wc -l) = 3 ]; then
+          if [ $(echo $VER | grep -o "." | wc -l) = 3 ]; then
             echo "Major version"
             IFS=. read -r a b c <<< "$VER"
             echo Next Version: "$a.$b.$((c+1))"-${GITHUB_RUN_ID}
