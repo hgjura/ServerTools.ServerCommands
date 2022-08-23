@@ -93,8 +93,6 @@ jobs:
             echo "Minor version"
             IFS=. read -r a b c d <<< "$VER"
             echo Next Version: "$a.$b.$c.$((d+1))"-${GITHUB_RUN_ID}
-            ${VERSION} = ""$a.$b.$c.$((d+1))"-${GITHUB_RUN_ID}
-            echo  ${VERSION}
           fi
       working-directory: ./src/${{ env.PROJECT_NAME_CORE }}/
 
