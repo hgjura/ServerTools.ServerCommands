@@ -51,13 +51,13 @@ namespace ServerTools.ServerCommands.Tests
         {
             _container
                 .Use(logger)
-                .RegisterResponse<AddNumbersCommand, AddNumbersResponse>();
+                .RegisterCommand<AddNumbersCommand, AddNumbersResponse>();
 
-            _ = commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
+            _ = await commands.PostCommandAsync<AddNumbersCommand>(new { Number1 = 2, Number2 = 3 });
 
-            var result1 = commands.ExecuteCommandsAsync();
+            var result1 = await commands.ExecuteCommandsAsync();
 
-            var result2 = commands.ExecuteResponsesAsync();
+            var result2 = await commands.ExecuteResponsesAsync();
 
             var dlq_comm = await commands.HandleCommandsDlqAsync(HandleDlqMessage);
             var dlq_resp = await commands.HandleResponsesDlqAsync(HandleDlqMessage);

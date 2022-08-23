@@ -120,6 +120,13 @@ namespace ServerTools.ServerCommands
                     if (container.IsCommandRegistered(type))
                     {
                         var cmd = container.ResolveCommand(type);
+
+                        if (cmd.RequiresResponse && !container.IsResponseRegisteredForCommand(cmd.GetType()))
+                        {
+                            log?.LogError($"Response for command type [{type}] is not registered with the container and cannot be processed. Skipping.");
+                            throw new ApplicationException($"Response for command type [{type}] is not registered with the container and cannot be processed.");
+                        }
+                       
                         var r = await connectionOptions.RetryPolicy.ExecuteAsync(async () => await cmd?.ExecuteAsync(m, metadata));
 
                         metadata = r.Item4;
@@ -127,7 +134,7 @@ namespace ServerTools.ServerCommands
 
                         if (cmd.RequiresResponse && r.Item3 != null)
                         {
-                            var resp = container.ResolveResponseFromCommand(cmd.GetType());                            
+                            var resp = container.ResolveResponseFromCommand(cmd.GetType());
 
                             if (resp != null)
                                 PostResponseAsync(resp.GetType(), r.Item3, metadata);
@@ -236,7 +243,7 @@ namespace ServerTools.ServerCommands
 
                 foreach (var m in messages)
                 {
-                    var r = await ExecuteCommandMessage(m);
+                    var r = await ExecuteResponseMessage(m);
 
                     if (!r.Item1)
                     {

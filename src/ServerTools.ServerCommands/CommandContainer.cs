@@ -1,6 +1,7 @@
 ﻿using DryIoc;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace ServerTools.ServerCommands
 {
@@ -138,6 +139,10 @@ namespace ServerTools.ServerCommands
         public bool IsResponseRegistered(Type type)
         {
             return c.IsRegistered<IRemoteResponse>(serviceKey: type.Name);
+        }
+        public bool IsResponseRegisteredForCommand(Type commandtype)
+        {
+            return commandresponsetypemap.ContainsKey(commandtype) ? IsResponseRegistered(commandresponsetypemap[commandtype]) : false;
         }
 
         public IRemoteResponse ResolveResponse<TResponse>() where TResponse : IRemoteResponse
